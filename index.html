@@ -57,7 +57,6 @@ body {
     line-height: 1.6;
 }
 
-/* ===== ألوان الأقسام ===== */
 .science  { border-right:4px solid #2563eb; }
 .accredit { border-right:4px solid #16a34a; }
 .research { border-right:4px solid #7c3aed; }
@@ -140,7 +139,6 @@ select:focus {
     border-color: #2563eb;
 }
 
-/* ===== Button + Spinner ===== */
 button {
     width: 100%;
     margin-top: 22px;
@@ -231,7 +229,7 @@ button.loading .spinner {
         <!-- Footer inside Sidebar -->
         <div class="sidebar-footer">
             <div class="footer-box">
-                powered by Ali Alwaily<br>
+                Powered by Ali Al-Waily<br>
                 الشؤون العلمية © 2026
             </div>
         </div>
@@ -242,8 +240,7 @@ button.loading .spinner {
         <div class="card">
             <div class="card-header">
                 <h1>نظام الصادرة الإلكتروني</h1>
-                <h1>الشؤون العلمية</h1>
-                <h1>كلية التخطيط</h1>
+                <h1>كلية التخطيط العمراني / الشؤون العلمية</h1>
             </div>
 
             <label>القسم / الوحدة</label>
@@ -257,6 +254,8 @@ button.loading .spinner {
                 <option value="ohuwm">التسجيل</option>
                 <option value="gatdu">وحدة حقوق الانسان</option>
                 <option value="gatda">وحدة الحاضنة وتكنلوجيا المعلومات</option>
+                <option value="sci">البعثات</option>
+
             </select>
 
             <button id="reserveBtn" onclick="reserve()">
@@ -281,7 +280,7 @@ function reserve() {
     const deptName = select.options[select.selectedIndex].text;
 
     if (!deptClass) {
-        alert("يرجى اختيار القسم");
+        alert("يرجى اختيار  القسم / الوحدة");
         return;
     }
 
@@ -301,7 +300,7 @@ function reserve() {
                 <div class="result-box">
                     <div class="icon">✓</div>
                     تم حجز رقم الصادرة بنجاح
-                    <div class="serial">رقم الصادرة: ${data.serial}</div>
+                    <div class="serial">رقم الصادرة : ${data.serial}</div>
                 </div>
             `;
             addToLog(data.serial, deptName, deptClass);
