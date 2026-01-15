@@ -70,10 +70,11 @@ body {
     flex: 1;
     padding: 50px;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
 }
 
+/* ===== Card ===== */
 .card {
     width: 420px;
     background: #ffffff;
@@ -154,7 +155,7 @@ button.loading .spinner {
     to   { transform: rotate(360deg); }
 }
 
-/* ===== Success Result Box ===== */
+/* ===== Result Box ===== */
 .result-box {
     margin-top: 18px;
     padding: 16px;
@@ -181,16 +182,30 @@ button.loading .spinner {
     color: #047857;
 }
 
-/* Animation */
 @keyframes fadeSlide {
-    from {
-        opacity: 0;
-        transform: translateY(-6px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Footer (يمين) ===== */
+.footer {
+    margin-top: auto;
+    margin-bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;   /* ← هنا النقل إلى اليمين */
+}
+
+.footer .footer-box {
+    padding: 12px 18px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 12px;
+    text-align: right;
+    color: #065f46;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.6;
 }
 </style>
 </head>
@@ -228,8 +243,6 @@ button.loading .spinner {
                 <option value="ohuwm">التسجيل</option>
                 <option value="gatdu">وحدة حقوق الانسان</option>
                 <option value="gatda">وحدة الحاضنة وتكنلوجيا المعلومات</option>
-                <option value="sci">البعثات</option>
-
             </select>
 
             <button id="reserveBtn" onclick="reserve()">
@@ -237,8 +250,15 @@ button.loading .spinner {
                 <span class="spinner"></span>
             </button>
 
-            <!-- Result -->
             <div id="result"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-box">
+                powered by Ali Alwaily<br>
+                الشؤون العلمية © 2026
+            </div>
         </div>
     </main>
 
