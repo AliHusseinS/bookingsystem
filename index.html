@@ -26,6 +26,8 @@ body {
     background: #ffffff;
     border-left: 1px solid #e5e7eb;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar h2 {
@@ -41,7 +43,7 @@ body {
 }
 
 .log-list {
-    max-height: calc(100vh - 120px);
+    flex: 1;
     overflow-y: auto;
 }
 
@@ -55,7 +57,7 @@ body {
     line-height: 1.6;
 }
 
-/* ألوان الأقسام */
+/* ===== ألوان الأقسام ===== */
 .science  { border-right:4px solid #2563eb; }
 .accredit { border-right:4px solid #16a34a; }
 .research { border-right:4px solid #7c3aed; }
@@ -65,16 +67,40 @@ body {
 .gatdu    { border-right:4px solid #ec4899; }
 .gatda    { border-right:4px solid #14b8a6; }
 
+/* ===== Sidebar Footer ===== */
+.sidebar-footer {
+    margin-top: 15px;
+}
+
+.sidebar-footer .footer-box {
+    width: 100%;
+    min-height: 70px;
+    padding: 12px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 12px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+    color: #065f46;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
 /* ===== Content ===== */
 .content {
     flex: 1;
     padding: 50px;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    justify-content: center;
+    align-items: flex-start;
 }
 
-/* ===== Card ===== */
 .card {
     width: 420px;
     background: #ffffff;
@@ -186,27 +212,6 @@ button.loading .spinner {
     from { opacity: 0; transform: translateY(-6px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-
-/* ===== Footer (يمين) ===== */
-.footer {
-    margin-top: auto;
-    margin-bottom: 20px;
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;   /* ← هنا النقل إلى اليمين */
-}
-
-.footer .footer-box {
-    padding: 12px 18px;
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    border-radius: 12px;
-    text-align: right;
-    color: #065f46;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.6;
-}
 </style>
 </head>
 
@@ -218,8 +223,17 @@ button.loading .spinner {
     <aside class="sidebar">
         <h2>سجل الأرقام المحجوزة</h2>
         <div class="log-title">الجلسة الحالية</div>
+
         <div class="log-list" id="todayLog">
             <div class="log-item">لا توجد عمليات حجز بعد</div>
+        </div>
+
+        <!-- Footer inside Sidebar -->
+        <div class="sidebar-footer">
+            <div class="footer-box">
+                powered by Ali Alwaily<br>
+                الشؤون العلمية © 2026
+            </div>
         </div>
     </aside>
 
@@ -251,14 +265,6 @@ button.loading .spinner {
             </button>
 
             <div id="result"></div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <div class="footer-box">
-                powered by Ali Alwaily<br>
-                الشؤون العلمية © 2026
-            </div>
         </div>
     </main>
 
