@@ -14,13 +14,13 @@ body {
     color: #1e293b;
 }
 
-/* Layout */
+/* ===== Layout ===== */
 .layout {
     display: flex;
     min-height: 100vh;
 }
 
-/* Sidebar */
+/* ===== Sidebar ===== */
 .sidebar {
     width: 260px;
     background: #ffffff;
@@ -56,15 +56,16 @@ body {
 }
 
 /* ألوان الأقسام */
-.science  { border-right:4px solid #2563eb; }   /* التعليم المستمر */
-.accredit { border-right:4px solid #16a34a; }   /* الدراسات العليا */
-.research { border-right:4px solid #7c3aed; }   /* الشؤون العلمية */
-.postgrad { border-right:4px solid #f59e0b; }   /* الدراسات والتخطيط */
-.oofcs    { border-right:4px solid #dc2626; }   /* مكتب المعاون العلمي */
-.ohuwm    { border-right:4px solid #0ea5e9; }   /* التسجيل */
-.gatdu    { border-right:4px solid #ec4899; }   /* حقوق الانسان */
-.gatda    { border-right:4px solid #14b8a6; }   /* الحاضنة */
+.science  { border-right:4px solid #2563eb; }
+.accredit { border-right:4px solid #16a34a; }
+.research { border-right:4px solid #7c3aed; }
+.postgrad { border-right:4px solid #f59e0b; }
+.oofcs    { border-right:4px solid #dc2626; }
+.ohuwm    { border-right:4px solid #0ea5e9; }
+.gatdu    { border-right:4px solid #ec4899; }
+.gatda    { border-right:4px solid #14b8a6; }
 
+/* ===== Content ===== */
 .content {
     flex: 1;
     padding: 50px;
@@ -112,7 +113,7 @@ select:focus {
     border-color: #2563eb;
 }
 
-/* Button + Spinner */
+/* ===== Button + Spinner ===== */
 button {
     width: 100%;
     margin-top: 22px;
@@ -150,14 +151,46 @@ button.loading .spinner {
 
 @keyframes spin {
     from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    to   { transform: rotate(360deg); }
 }
 
-.result {
-    margin-top: 16px;
+/* ===== Success Result Box ===== */
+.result-box {
+    margin-top: 18px;
+    padding: 16px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 12px;
     text-align: center;
+    color: #065f46;
+    font-size: 14px;
     font-weight: 600;
-    color: #16a34a;
+    line-height: 1.8;
+    animation: fadeSlide .4s ease-out;
+}
+
+.result-box .icon {
+    font-size: 22px;
+    margin-bottom: 6px;
+    color: #059669;
+}
+
+.result-box .serial {
+    margin-top: 6px;
+    font-size: 16px;
+    color: #047857;
+}
+
+/* Animation */
+@keyframes fadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 </style>
 </head>
@@ -195,7 +228,7 @@ button.loading .spinner {
                 <option value="ohuwm">التسجيل</option>
                 <option value="gatdu">وحدة حقوق الانسان</option>
                 <option value="gatda">وحدة الحاضنة وتكنلوجيا المعلومات</option>
-                <option value="sc">البعثات</option>
+                <option value="sci">البعثات</option>
 
             </select>
 
@@ -204,7 +237,8 @@ button.loading .spinner {
                 <span class="spinner"></span>
             </button>
 
-            <div class="result" id="result"></div>
+            <!-- Result -->
+            <div id="result"></div>
         </div>
     </main>
 
@@ -237,8 +271,13 @@ function reserve() {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            document.getElementById("result").innerHTML =
-                "تم حجز رقم الصادرة بنجاح<br>رقم الصادرة: " + data.serial;
+            document.getElementById("result").innerHTML = `
+                <div class="result-box">
+                    <div class="icon">✓</div>
+                    تم حجز رقم الصادرة بنجاح
+                    <div class="serial">رقم الصادرة: ${data.serial}</div>
+                </div>
+            `;
             addToLog(data.serial, deptName, deptClass);
         }
     })
