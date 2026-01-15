@@ -5,10 +5,8 @@
 <title>نظام الصادرة الإلكتروني</title>
 
 <style>
-/* ===== Reset ===== */
 * { box-sizing: border-box; }
 
-/* ===== Base ===== */
 body {
     margin: 0;
     font-family: "Segoe UI", Tahoma, Arial;
@@ -16,13 +14,13 @@ body {
     color: #1e293b;
 }
 
-/* ===== Layout ===== */
+/* Layout */
 .layout {
     display: flex;
     min-height: 100vh;
 }
 
-/* ===== Sidebar (Froza-style) ===== */
+/* Sidebar */
 .sidebar {
     width: 260px;
     background: #ffffff;
@@ -47,7 +45,6 @@ body {
     overflow-y: auto;
 }
 
-/* Log item */
 .log-item {
     background: #f8fafc;
     border: 1px solid #e5e7eb;
@@ -58,13 +55,16 @@ body {
     line-height: 1.6;
 }
 
-/* subtle color indicators */
-.science  { border-right: 4px solid #3b82f6; }
-.accredit { border-right: 4px solid #10b981; }
-.research { border-right: 4px solid #8b5cf6; }
-.postgrad { border-right: 4px solid #f59e0b; }
+/* ألوان الأقسام */
+.science  { border-right:4px solid #2563eb; }   /* التعليم المستمر */
+.accredit { border-right:4px solid #16a34a; }   /* الدراسات العليا */
+.research { border-right:4px solid #7c3aed; }   /* الشؤون العلمية */
+.postgrad { border-right:4px solid #f59e0b; }   /* الدراسات والتخطيط */
+.oofcs    { border-right:4px solid #dc2626; }   /* مكتب المعاون العلمي */
+.ohuwm    { border-right:4px solid #0ea5e9; }   /* التسجيل */
+.gatdu    { border-right:4px solid #ec4899; }   /* حقوق الانسان */
+.gatda    { border-right:4px solid #14b8a6; }   /* الحاضنة */
 
-/* ===== Main content ===== */
 .content {
     flex: 1;
     padding: 50px;
@@ -73,7 +73,6 @@ body {
     align-items: flex-start;
 }
 
-/* ===== Card ===== */
 .card {
     width: 420px;
     background: #ffffff;
@@ -90,7 +89,6 @@ body {
 .card-header h1 {
     font-size: 16px;
     margin: 4px 0;
-    color: #1e293b;
     font-weight: 600;
 }
 
@@ -106,7 +104,6 @@ select {
     padding: 10px;
     border-radius: 8px;
     border: 1px solid #d1d5db;
-    background: #ffffff;
     font-size: 14px;
 }
 
@@ -115,7 +112,7 @@ select:focus {
     border-color: #2563eb;
 }
 
-/* ===== Button + Spinner ===== */
+/* Button + Spinner */
 button {
     width: 100%;
     margin-top: 22px;
@@ -127,13 +124,9 @@ button {
     font-size: 15px;
     cursor: pointer;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     gap: 8px;
-}
-
-button:hover {
-    background: #1d4ed8;
 }
 
 button:disabled {
@@ -141,7 +134,6 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* Spinner */
 .spinner {
     width: 16px;
     height: 16px;
@@ -149,7 +141,7 @@ button:disabled {
     border-top: 2px solid transparent;
     border-radius: 50%;
     display: none;
-    animation: spin 0.8s linear infinite;
+    animation: spin .8s linear infinite;
 }
 
 button.loading .spinner {
@@ -158,7 +150,7 @@ button.loading .spinner {
 
 @keyframes spin {
     from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
+    to { transform: rotate(360deg); }
 }
 
 .result {
@@ -198,15 +190,15 @@ button.loading .spinner {
                 <option value="science">التعليم المستمر</option>
                 <option value="accredit">الدراسات العليا</option>
                 <option value="research">الشؤون العلمية</option>
-                <option value="postgrad">الدراسات والتخطيط </option>
-                <option value="oofcs">مكتب المعاون العلمي </option>
-                <option value="ohuwm">التسجيل </option>
-                <option value="gatdu">وحدة حقوق الانسان </option>
-                <option value="gatda">وحدة الحاضنة وتكنلوجيا المعلومات </op
+                <option value="postgrad">الدراسات والتخطيط</option>
+                <option value="oofcs">مكتب المعاون العلمي</option>
+                <option value="ohuwm">التسجيل</option>
+                <option value="gatdu">وحدة حقوق الانسان</option>
+                <option value="gatda">وحدة الحاضنة وتكنلوجيا المعلومات</option>
             </select>
-            
+
             <button id="reserveBtn" onclick="reserve()">
-                <span class="btn-text">حجز رقم صادرة جديد</span>
+                <span>حجز رقم صادرة جديد</span>
                 <span class="spinner"></span>
             </button>
 
@@ -217,7 +209,6 @@ button.loading .spinner {
 </div>
 
 <script>
-/* 🔒 نفس رابط Google Apps Script */
 const API_URL =
 "https://script.google.com/macros/s/AKfycbwbjCHOdsjdIquKRTurm6ZMS0fZm2wzAOZggWtq-Ic4bokRyvkNEGO0bqGLnziVph-vYQ/exec";
 
@@ -232,7 +223,6 @@ function reserve() {
         return;
     }
 
-    /* قفل الزر + تشغيل Spinner */
     btn.disabled = true;
     btn.classList.add("loading");
     document.getElementById("result").innerHTML = "جارٍ حجز الرقم...";
@@ -248,17 +238,9 @@ function reserve() {
             document.getElementById("result").innerHTML =
                 "تم حجز رقم الصادرة بنجاح<br>رقم الصادرة: " + data.serial;
             addToLog(data.serial, deptName, deptClass);
-        } else {
-            document.getElementById("result").innerHTML =
-                "فشل الحجز، حاول مرة أخرى";
         }
     })
-    .catch(() => {
-        document.getElementById("result").innerHTML =
-            "تعذر الاتصال بالنظام";
-    })
     .finally(() => {
-        /* فتح الزر بعد اكتمال العملية */
         btn.disabled = false;
         btn.classList.remove("loading");
     });
