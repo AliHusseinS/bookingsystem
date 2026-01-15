@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>نظام الصادرة الإلكتروني</title>
+
+<style>
+/* ===== Reset ===== */
+* { box-sizing: border-box; }
+
+/* ===== Base ===== */
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Arial;
+    background: #f5f7fb;
+    color: #1e293b;
+}
+
+/* ===== Layout ===== */
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ===== Sidebar (Froza style) ===== */
+.sidebar {
+    width: 260px;
+    background: #ffffff;
+    border-left: 1px solid #e5e7eb;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    font-size: 15px;
+    margin-bottom: 18px;
+    color: #2563eb;
+}
+
+.sidebar .log-title {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 10px;
+}
+
+.log-list {
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+/* Log item */
+.log-item {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* subtle color indicators */
+.science  { border-right: 4px solid #3b82f6; }
+.accredit { border-right: 4px solid #10b981; }
+.research { border-right: 4px solid #8b5cf6; }
+.postgrad { border-right: 4px solid #f59e0b; }
+
+/* ===== Main content ===== */
+.content {
+    flex: 1;
+    padding: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* ===== Card ===== */
+.card {
+    width: 420px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+}
+
+.card-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.card-header h1 {
+    font-size: 16px;
+    margin: 4px 0;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #475569;
+}
+
+select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    font-size: 14px;
+}
+
+select:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+/* Button */
+button {
+    width: 100%;
+    margin-top: 22px;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+.result {
+    margin-top: 16px;
+    text-align: center;
+    font-weight: 600;
+    color: #16a34a;
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h2>سجل الأرقام المحجوزة</h2>
+        <div class="log-title">الجلسة الحالية</div>
+        <div class="log-list" id="todayLog">
+            <div class="log-item">لا توجد عمليات حجز بعد</div>
+        </div>
+    </aside>
+
+    <!-- Content -->
+    <main class="content">
+        <div class="card">
+            <div class="card-header">
+                <h1>نظام الصادرة الإلكتروني</h1>
+                <h1>الشؤون العلمية</h1>
+                <h1>كلية التخطيط</h1>
+            </div>
+
+            <label>القسم / الوحدة</label>
+            <select id="department">
+                <option value="">— اختر —</option>
+                <option value="science">الشؤون العلمية</option>
+                <option value="accredit">وحدة الاعتماد</option>
+                <option value="research">وحدة البحوث</option>
+                <option value="postgrad">وحدة الدراسات العليا</option>
+            </select>
+
+            <button onclick="reserve()">حجز رقم صادرة جديد</button>
+            <div class="result" id="result"></div>
+        </div>
+    </main>
+
+</div>
+
+<script>
+/* 🔒 نفس منطق العمل – بدون تغيير */
+const API_URL =
+"https://script.google.com/macros/s/AKfycbwbjCHOdsjdIquKRTurm6ZMS0fZm2wzAOZggWtq-Ic4bokRyvkNEGO0bqGLnziVph-vYQ/exec";
+
+function reserve() {
+    const select = document.getElementById("department");
+    const deptClass = select.value;
+    const deptName = select.options[select.selectedIndex].text;
+
+    if (!deptClass) {
+        alert("يرجى اختيار القسم");
+        return;
+    }
+
+    document.getElementById("result").innerHTML = "جارٍ حجز الرقم...";
+
+    fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "department=" + encodeURIComponent(deptName)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById("result").innerHTML =
+                "تم حجز رقم الصادرة بنجاح<br>رقم الصادرة: " + data.serial;
+            addToLog(data.serial, deptName, deptClass);
+        }
+    });
+}
+
+function addToLog(serial, deptName, deptClass) {
+    const container = document.getElementById("todayLog");
+    if (container.children[0]?.textContent.includes("لا توجد")) {
+        container.innerHTML = "";
+    }
+
+    const div = document.createElement("div");
+    div.className = "log-item " + deptClass;
+    div.innerHTML =
+        "رقم صادرة: <b>" + serial + "</b><br>القسم: " + deptName;
+
+    container.prepend(div);
+}
+</script>
+
+</body>
+</html>
