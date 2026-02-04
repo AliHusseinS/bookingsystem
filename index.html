@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -363,24 +364,15 @@ function openTab(id,btn){
 }
 
 function post(action,payload){
-
-  const f = new FormData();
+  const f=new FormData();
   f.append("action",action);
   f.append("payload",JSON.stringify(payload));
-
-  // 🔥 منع الكاش نهائياً
-  const url = API_URL + "?t=" + Date.now();
-
-  return fetch(url,{
-    method:"POST",
-    body:f,
-    cache:"no-store"
-  })
-  .then(r=>r.json());
+  return fetch(API_URL,{method:"POST",body:f}).then(r=>r.json());
 }
 
-
-fetch(API_URL + "?t=" + Date.now(),{cache:"no-store"})
+fetch(API_URL).then(r=>r.json()).then(d=>{
+  document.getElementById("رقم الطالب").value=d.nextId;
+});
 
 function addStudent(){
   if(MODE!=="ADD") return;
@@ -418,18 +410,18 @@ function saveUpdate(){
   btn.innerHTML = "⏳ جارِ الحفظ...";
 
   const row = ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
+  const studentId = document.getElementById("رقم الطالب").value;
 
   post("update",{rowIndex:currentRowIndex,row})
   .then(()=>{
 
-    // 🔥 بعد الحفظ أعد جلب الطالب من الشيت للتأكيد
-    const studentId = document.getElementById("رقم الطالب").value;
-
+    // 🔥 إعادة البحث بالرقم الحقيقي وليس rowIndex
     return post("search",{query:studentId});
   })
   .then(d=>{
 
     if(d && d.found){
+      currentRowIndex = d.rowIndex; // تحديث السطر الصحيح
       ALL_COLUMNS.forEach((c,i)=>{
         document.getElementById(c).value = d.row[i] || "";
       });
