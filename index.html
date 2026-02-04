@@ -2,122 +2,110 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>منظومة إدخال وتعديل بيانات الطلبة</title>
+<title>منظومة طلبة الدراسات العليا</title>
 
 <style>
-body{margin:0;font-family:Tahoma;background:#F5F7F8}
-header{background:#00897B;color:#fff;padding:15px 30px;font-size:20px;font-weight:bold;display:flex;justify-content:space-between}
-.tabs{display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:#fff;border-bottom:3px solid #00897B}
-.tabs button{border:none;background:#E0F2F1;padding:8px 14px;border-radius:20px;cursor:pointer;font-weight:bold;color:#004D40}
+body{font-family:Tahoma;background:#F5F7F8;margin:0}
+header{background:#00897B;color:#fff;padding:15px;font-size:20px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:#fff}
+.tabs button{border:none;background:#E0F2F1;padding:8px 14px;border-radius:20px;cursor:pointer}
 .tabs button.active{background:#00897B;color:#fff}
 .section{display:none;padding:20px}
 .section.active{display:block}
-.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
-.field{background:#fff;padding:10px;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,.05)}
-.field label{font-size:13px;font-weight:bold;color:#004D40}
-.field input{width:100%;padding:8px;margin-top:5px;border-radius:6px;border:1px solid #ccc}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.field{background:#fff;padding:10px;border-radius:8px}
+.field label{font-size:13px;font-weight:bold}
+.field input{width:100%;padding:7px;margin-top:4px}
 .actions{text-align:center;padding:15px}
-.actions button{padding:10px 20px;border:none;border-radius:6px;font-size:14px;cursor:pointer;margin:5px}
-.add-btn{background:#00897B;color:#fff}
-.update-btn{background:#FF9800;color:#fff;display:none}
-.cancel-btn{background:#9E9E9E;color:#fff;display:none}
-.search-bar{padding:15px;background:#E0F2F1;text-align:center}
+.actions button{padding:10px 20px;margin:5px}
 </style>
 </head>
 
 <body>
 
-<header>
-<div>منظومة إدخال وتعديل بيانات الطلبة</div>
-<div>كلية التخطيط العمراني</div>
-</header>
+<header>منظومة إدخال وتعديل بيانات الطلبة</header>
 
-<!-- SEARCH -->
-<div class="search-bar">
-<input id="searchBox" placeholder="رقم الطالب أو الاسم الرباعي"
-style="padding:8px;width:320px;border-radius:6px;border:1px solid #ccc">
+<div style="padding:10px;text-align:center;background:#E0F2F1">
+<input id="searchBox" placeholder="رقم الطالب أو الاسم الرباعي" style="width:300px;padding:7px">
 <button onclick="searchStudent()">بحث</button>
 </div>
 
-<!-- TABS -->
 <div class="tabs" id="tabs"></div>
-
 <div id="sections"></div>
 
 <div class="actions">
-<button class="add-btn" onclick="addStudent()">إضافة طالب جديد</button>
-<button class="update-btn" id="updateBtn" onclick="saveUpdate()">حفظ التعديلات</button>
-<button class="cancel-btn" id="cancelBtn" onclick="cancelEdit()">إلغاء</button>
+<button onclick="addStudent()">إضافة طالب</button>
+<button id="updateBtn" onclick="saveUpdate()" style="display:none">حفظ التعديلات</button>
+<button id="cancelBtn" onclick="location.reload()" style="display:none">إلغاء</button>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwPdB9DDyj3VIPM7QBg6_v_O-wxZpca5BoN0GuA2LJtk01Cqh-eakmIn_z3ZVcyBfYm/exec";
-let currentRowIndex = null;
-let editMode = false;
+// ===== ضع رابط Google Script هنا =====
+const API_URL = "https://script.google.com/macros/s/AKfycbwZOZO5c1JpjcqdvRs4JmciDp2Ofg5WhNoCJnHphprXLTHl3cYT_38R2MVTme5njkeT/exec";
 
-/* ===== ALL COLUMNS (FULL – SAME ORDER AS SHEET) ===== */
-const allColumns = [
+let MODE = "ADD";
+let currentRowIndex = null;
+
+/* ===== الأعمدة (يدوياً – كما طلبت) ===== */
+const ALL_COLUMNS = [
 "رقم الطالب","المف الورقي","الاسم الرباعي واللقب","الجنس","تاريخ الميلاد",
 "سنة القبول","قناة القبول","الجامعة المقبول فيها","الكلية المقبول فيها","القسم المقبول فيه",
-"رقم الامر الجامعي بالقبول","تاريخ الامر الجامعي بالقبول","التسلسل في الامر الجامعي",
-"نوع القبول","نوع الدراسة","اصل الدراسة","رقم الموبايل","البريد الالكتروني",
+"رقم الامر الجامعي بالقبول","تاريخ الامر الجامعي بالقبول","نوع القبول","نوع الدراسة",
+"رقم الموبايل","البريد الالكتروني",
 "رقم وثيقة البكالوريوس","تاريخ وثيقة البكالوريوس","معدل البكلوريوس",
-"سنة التخرج لشهادة البكالوريوس","الجامعة التي تخرج منها للبكالوريوس",
-"الكلية التي تخرج منها للبكالوريوس","القسم التي تخرج منه للبكالوريوس",
-"رقم وثيقة الدبلوم العالي","تاريخ وثيقة الدبلوم العالي","معدل الدبلوم العالي",
-"سنة التخرج لشهادة الدبلوم العال","الجامعة التي تخرج منها",
-"الكلية التي تخرج منها للدبلوم العلي","القسم التي تخرج منه للدبلوم العلي",
-"رقم وثيقة الماجستير","تاريخ وثيقة الماجستير","معدل الماجستير",
-"سنة التخرج لشهادة الماجستير","الجامعة التي تخرج منها الماجستير",
-"الكلية التي تخرج منها الماجستير","القسم التي تخرج منه الماجستير",
 "عنوان الرسالة باللغة العربية","عنوان الرسالة باللغة الإنكليزية",
 "اسم المشرف الأول","اللقب العلمي للمشرف1",
-"تاريخ المناقشة","درجة المناقشة","معدل الطالب النهائي","تقدير الطالب النهائي",
+"تاريخ المناقشة","درجة المناقشة","معدل الطالب النهائي",
 "رقم الامر الجامعي بالتخرج","تاريخ الامر الجامعي بالتخرج",
-"منظم الاستمارة","مقرر الدراسات العليا","رئيس القسم",
-"معاون العميد للشؤون العلمية والدراسات العليا","عميد الكلية","عمود1"
+"منظم الاستمارة","عميد الكلية"
 ];
 
-/* ===== TABS CONFIG ===== */
-const tabsConfig = {
-"البيانات الأساسية": allColumns.slice(0,10),
-"القبول والدراسة": allColumns.slice(10,18),
-"الشهادات السابقة": allColumns.slice(18,33),
-"الإشراف والبحث": allColumns.slice(33,42),
-"المناقشة والتخرج": allColumns.slice(42,55),
-"معلومات أخرى": allColumns.slice(55)
+/* ===== Tabs ===== */
+const TABS = {
+"بيانات أساسية": ALL_COLUMNS.slice(0,6),
+"القبول": ALL_COLUMNS.slice(6,14),
+"الاتصال": ALL_COLUMNS.slice(14,16),
+"الشهادات": ALL_COLUMNS.slice(16,19),
+"الإشراف": ALL_COLUMNS.slice(19,23),
+"المناقشة": ALL_COLUMNS.slice(23,26),
+"التخرج": ALL_COLUMNS.slice(26)
 };
 
-/* ===== BUILD UI ===== */
+function buildUI(){
 const tabsDiv=document.getElementById("tabs");
-const sectionsDiv=document.getElementById("sections");
+const secDiv=document.getElementById("sections");
 let first=true;
 
-for(let tab in tabsConfig){
-let btn=document.createElement("button");
-btn.innerText=tab;
-btn.onclick=()=>openTab(tab,btn);
+for(const t in TABS){
+const btn=document.createElement("button");
+btn.textContent=t;
 if(first)btn.classList.add("active");
+btn.onclick=()=>openTab(t,btn);
 tabsDiv.appendChild(btn);
 
-let sec=document.createElement("div");
-sec.id=tab;
+const sec=document.createElement("div");
+sec.id=t;
 sec.className="section"+(first?" active":"");
-let grid=document.createElement("div");
+
+const grid=document.createElement("div");
 grid.className="form-grid";
 
-tabsConfig[tab].forEach(c=>{
+TABS[t].forEach(c=>{
 grid.innerHTML+=`
 <div class="field">
 <label>${c}</label>
 <input id="${c}" ${c==="رقم الطالب"?"readonly":""}>
 </div>`;
 });
+
 sec.appendChild(grid);
-sectionsDiv.appendChild(sec);
+secDiv.appendChild(sec);
 first=false;
 }
+}
+buildUI();
 
+/* ===== Tabs ===== */
 function openTab(id,btn){
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
@@ -125,53 +113,45 @@ document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"
 btn.classList.add("active");
 }
 
-/* ===== LOAD NEXT ID ===== */
+/* ===== جلب رقم الطالب ===== */
 fetch(API_URL).then(r=>r.json()).then(d=>{
 document.getElementById("رقم الطالب").value=d.nextId;
 });
 
-/* ===== ADD ===== */
+/* ===== إضافة ===== */
 function addStudent(){
-let row=[];
-allColumns.forEach(c=>row.push(document.getElementById(c).value));
+if(MODE!=="ADD")return;
+const row=ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
 fetch(API_URL,{method:"POST",headers:{'Content-Type':'application/json'},
 body:JSON.stringify({action:"add",row})})
-.then(()=>alert("تمت إضافة الطالب بنجاح"));
+.then(()=>alert("تمت الإضافة"));
 }
 
-/* ===== SEARCH ===== */
+/* ===== بحث ===== */
 function searchStudent(){
-let q=document.getElementById("searchBox").value.trim();
-if(!q)return alert("ادخل رقم الطالب او الاسم");
-
+const q=document.getElementById("searchBox").value.trim();
+if(!q)return;
 fetch(API_URL,{method:"POST",headers:{'Content-Type':'application/json'},
 body:JSON.stringify({action:"search",query:q})})
-.then(r=>r.json())
-.then(d=>{
-if(!d.found)return alert("الطالب غير موجود");
-if(confirm(`الطالب ${d.row[2]} موجود\nهل تريد تعديل بياناته؟`)){
-editMode=true;
+.then(r=>r.json()).then(d=>{
+if(!d.found)return alert("غير موجود");
+if(confirm("الطالب موجود، هل تريد التعديل؟")){
+MODE="EDIT";
 currentRowIndex=d.rowIndex;
-allColumns.forEach((c,i)=>document.getElementById(c).value=d.row[i]||"");
+ALL_COLUMNS.forEach((c,i)=>document.getElementById(c).value=d.row[i]||"");
 document.getElementById("updateBtn").style.display="inline-block";
 document.getElementById("cancelBtn").style.display="inline-block";
 }
 });
 }
 
-/* ===== UPDATE ===== */
+/* ===== تحديث ===== */
 function saveUpdate(){
-if(!editMode)return;
-let row=[];
-allColumns.forEach(c=>row.push(document.getElementById(c).value));
+if(MODE!=="EDIT")return;
+const row=ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
 fetch(API_URL,{method:"POST",headers:{'Content-Type':'application/json'},
 body:JSON.stringify({action:"update",rowIndex:currentRowIndex,row})})
-.then(()=>alert("تم حفظ التعديلات بنجاح"));
-}
-
-/* ===== CANCEL ===== */
-function cancelEdit(){
-location.reload();
+.then(()=>alert("تم حفظ التعديلات"));
 }
 </script>
 
