@@ -58,6 +58,17 @@ header{background:#00897B;color:#fff;padding:15px;font-size:20px}
 <body>
 
 <header>منظومة إدخال وتعديل بيانات الطلبة – كلية التخطيط العمراني</header>
+<div id="editNotice" style="
+  display:none;
+  background:#FFF3CD;
+  color:#856404;
+  padding:10px;
+  text-align:center;
+  font-weight:bold;
+  border-bottom:2px solid #FFEEBA;
+">
+  ⚠️ أنت الآن في وضع تعديل بيانات الطالب
+</div>
 
 <div class="search">
   <input id="searchBox"
@@ -72,7 +83,7 @@ header{background:#00897B;color:#fff;padding:15px;font-size:20px}
 <div id="sections"></div>
 
 <div class="actions">
-  <button onclick="addStudent()">إضافة طالب جديد</button>
+  <button id="addBtn" onclick="addStudent()">إضافة طالب جديد</button>
   <button id="updateBtn" onclick="saveUpdate()" style="display:none">حفظ التعديلات</button>
   <button id="cancelBtn" onclick="location.reload()" style="display:none">إلغاء</button>
 </div>
@@ -266,6 +277,9 @@ function searchStudent(){
       });
       document.getElementById("updateBtn").style.display="inline-block";
       document.getElementById("cancelBtn").style.display="inline-block";
+      document.getElementById("addBtn").style.display="none";
+      document.getElementById("editNotice").style.display="block";
+
     }
   });
 }
