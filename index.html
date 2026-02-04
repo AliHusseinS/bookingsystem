@@ -6,8 +6,6 @@
 
 <style>
 
-/* ====== COLORS (MATCHING YOUR DESIGN) ====== */
-
 body{
 margin:0;
 font-family:Tahoma;
@@ -26,21 +24,15 @@ align-items:center;
 border-radius:0 0 12px 12px;
 }
 
-/* ====== CONTAINER ====== */
-
 .container{
 padding:25px;
 }
-
-/* ====== FORM GRID ====== */
 
 .form-grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
 gap:14px;
 }
-
-/* ====== INPUT FIELD ====== */
 
 .field{
 background:white;
@@ -64,8 +56,6 @@ border:1px solid #ccc;
 font-size:14px;
 }
 
-/* ====== SAVE BUTTON ====== */
-
 .save-area{
 margin-top:25px;
 text-align:center;
@@ -86,8 +76,6 @@ box-shadow:0 4px 10px rgba(0,0,0,.2);
 opacity:0.9;
 }
 
-/* ====== FOOTER BAR ====== */
-
 .footer{
 margin-top:25px;
 background:#E0F2F1;
@@ -99,16 +87,13 @@ border-radius:12px;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <header>
-
 <div>نظام إدخال معلومات الطلبة</div>
 <div>كلية التخطيط العمراني</div>
-
 </header>
 
 <div class="container">
@@ -131,12 +116,12 @@ border-radius:12px;
 
 // ================= CONFIG =================
 
-const API_URL = "https://script.google.com/macros/s/AKfycbx2Nr04iUJORd-h0Im56MLETg5D8362TRCT7tUEJufUDuc29oXo1E1cgFpqYDVFVfJG/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbySJyrfeB1xHI4UcM9ac7LanQ3YlFAbeTqC7CNdy7O2N4t4qdaSJXUDpcnsWE3cK4Ek/exec";
 
 let headers = [];
 let studentIdIndex = -1;
 
-// ================= LOAD HEADERS + NEXT STUDENT ID =================
+// ================= LOAD HEADERS =================
 
 fetch(API_URL)
 .then(res => res.json())
@@ -150,6 +135,10 @@ studentIdIndex = headers.indexOf("رقم الطالب");
 
 buildForm(headers, nextId);
 
+})
+.catch(err=>{
+alert("خطأ في الاتصال مع Google Script");
+console.log(err);
 });
 
 // ================= BUILD FORM =================
@@ -167,13 +156,11 @@ div.className="field";
 
 let inputHTML = `<input id="f${index}" placeholder="${col}">`;
 
-// Auto Student ID Field
 if(col === "رقم الطالب"){
 inputHTML = `
-<input 
-id="f${index}" 
+<input id="f${index}" 
 value="${nextId}" 
-readonly
+readonly 
 style="background:#E0F2F1;font-weight:bold;color:#004D40">
 `;
 }
@@ -189,30 +176,9 @@ form.appendChild(div);
 
 }
 
-// ================= VALIDATION =================
-
-function validate(){
-
-if(studentIdIndex === -1){
-alert("❌ لم يتم العثور على عمود (رقم الطالب) في Sheet information");
-return false;
-}
-
-// example mandatory field
-if(document.getElementById("f"+studentIdIndex).value == ""){
-alert("رقم الطالب غير موجود");
-return false;
-}
-
-return true;
-
-}
-
-// ================= SAVE DATA =================
+// ================= SAVE =================
 
 function saveData(){
-
-if(!validate()) return;
 
 let row=[];
 
@@ -223,19 +189,13 @@ row.push(document.getElementById("f"+i).value);
 fetch(API_URL,{
 method:"POST",
 headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-row:row
-})
+body:JSON.stringify({ row: row })
 })
 
 .then(res=>res.json())
 .then(d=>{
-
 alert("✅ تم حفظ معلومات الطالب بنجاح");
-
-// Reload to generate next student ID
 location.reload();
-
 });
 
 }
