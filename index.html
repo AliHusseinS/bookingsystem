@@ -56,8 +56,32 @@ header{background:#00897B;color:#fff;padding:15px;font-size:20px}
 </head>
 
 <body>
+<!-- ===== Welcome Overlay ===== -->
+<div id="welcomeOverlay">
+  <h1>منظومة طلبة الدراسات العليا</h1>
+  <p>كلية التخطيط العمراني – جامعة الكوفة</p>
+
+  <div class="welcome-actions">
+    <button onclick="enterSystem()">الدخول إلى النظام</button>
+    <button class="secondary" onclick="openViewer()">عرض البيانات</button>
+  </div>
+</div>
 
 <header>منظومة إدخال وتعديل بيانات الطلبة – كلية التخطيط العمراني</header>
+<!-- ===== Viewer Page ===== -->
+<div id="viewerPage">
+  <div class="viewer-box">
+    <iframe 
+      src="https://docs.google.com/spreadsheets/d/1IT2v-7mmjpvK2DIsCLykK_cJLTTMgfiJTqHWUXPvdIY/preview">
+    </iframe>
+
+    <div style="text-align:center;margin-top:15px">
+      <button onclick="exportPDF()">تصدير إلى PDF</button>
+      <button onclick="backHome()">الرجوع</button>
+    </div>
+  </div>
+</div>
+
 <div id="editNotice" style="
   display:none;
   background:#FFF3CD;
@@ -311,6 +335,28 @@ function highlightMatch(text, query){
   if(!query) return text;
   const q=query.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
   return text.replace(new RegExp(q,"gi"),m=>`<span class="match">${m}</span>`);
+}
+/* ===== Navigation ===== */
+function enterSystem(){
+  document.getElementById("welcomeOverlay").style.display="none";
+}
+
+function openViewer(){
+  document.getElementById("welcomeOverlay").style.display="none";
+  document.getElementById("viewerPage").style.display="block";
+  document.querySelector("header").style.display="none";
+  document.querySelector(".search").style.display="none";
+  document.getElementById("tabs").style.display="none";
+  document.getElementById("sections").style.display="none";
+  document.querySelector(".actions").style.display="none";
+}
+
+function backHome(){
+  location.reload();
+}
+
+function exportPDF(){
+  window.print();
 }
 
 function suggestNames(){
