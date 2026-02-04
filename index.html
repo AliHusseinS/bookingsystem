@@ -2,330 +2,244 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>نظام الصادرة الإلكتروني</title>
+<title>نظام إدخال معلومات الطلبة</title>
 
 <style>
-* { box-sizing: border-box; }
 
-body {
-    margin: 0;
-    font-family: "Segoe UI", Tahoma, Arial;
-    background: #f5f7fb;
-    color: #1e293b;
+/* ====== COLORS (MATCHING YOUR DESIGN) ====== */
+
+body{
+margin:0;
+font-family:Tahoma;
+background:#F5F7F8;
 }
 
-/* ===== Layout ===== */
-.layout {
-    display: flex;
-    min-height: 100vh;
+header{
+background:#00897B;
+color:white;
+padding:16px 30px;
+font-size:20px;
+font-weight:bold;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-radius:0 0 12px 12px;
 }
 
-/* ===== Sidebar ===== */
-.sidebar {
-    width: 260px;
-    background: #ffffff;
-    border-left: 1px solid #e5e7eb;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
+/* ====== CONTAINER ====== */
+
+.container{
+padding:25px;
 }
 
-.sidebar h2 {
-    font-size: 15px;
-    margin-bottom: 18px;
-    color: #2563eb;
+/* ====== FORM GRID ====== */
+
+.form-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:14px;
 }
 
-.sidebar .log-title {
-    font-size: 12px;
-    color: #64748b;
-    margin-bottom: 10px;
+/* ====== INPUT FIELD ====== */
+
+.field{
+background:white;
+padding:10px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,.05);
 }
 
-.log-list {
-    flex: 1;
-    overflow-y: auto;
+.field label{
+font-size:13px;
+font-weight:bold;
+color:#004D40;
 }
 
-.log-item {
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 10px 12px;
-    margin-bottom: 10px;
-    font-size: 13px;
-    line-height: 1.6;
+.field input{
+width:100%;
+padding:8px;
+margin-top:5px;
+border-radius:6px;
+border:1px solid #ccc;
+font-size:14px;
 }
 
-.science  { border-right:4px solid #2563eb; }
-.accredit { border-right:4px solid #16a34a; }
-.research { border-right:4px solid #7c3aed; }
-.postgrad { border-right:4px solid #f59e0b; }
-.oofcs    { border-right:4px solid #dc2626; }
-.ohuwm    { border-right:4px solid #0ea5e9; }
-.gatdu    { border-right:4px solid #ec4899; }
-.gatda    { border-right:4px solid #14b8a6; }
+/* ====== SAVE BUTTON ====== */
 
-/* ===== Sidebar Footer ===== */
-.sidebar-footer {
-    margin-top: 15px;
+.save-area{
+margin-top:25px;
+text-align:center;
 }
 
-.sidebar-footer .footer-box {
-    width: 100%;
-    min-height: 70px;
-    padding: 12px;
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    border-radius: 12px;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    text-align: center;
-    color: #065f46;
-    font-size: 12.5px;
-    font-weight: 600;
-    line-height: 1.6;
+.save-btn{
+background:linear-gradient(to right,#00796B,#004D40);
+color:white;
+border:none;
+padding:14px 45px;
+border-radius:30px;
+font-size:17px;
+cursor:pointer;
+box-shadow:0 4px 10px rgba(0,0,0,.2);
 }
 
-/* ===== Content ===== */
-.content {
-    flex: 1;
-    padding: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+.save-btn:hover{
+opacity:0.9;
 }
 
-.card {
-    width: 420px;
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 30px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+/* ====== FOOTER BAR ====== */
+
+.footer{
+margin-top:25px;
+background:#E0F2F1;
+padding:12px;
+text-align:center;
+font-weight:bold;
+color:#004D40;
+border-radius:12px;
 }
 
-.card-header {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.card-header h1 {
-    font-size: 16px;
-    margin: 4px 0;
-    font-weight: 600;
-}
-
-label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 14px;
-    color: #475569;
-}
-
-select {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    font-size: 14px;
-}
-
-select:focus {
-    outline: none;
-    border-color: #2563eb;
-}
-
-button {
-    width: 100%;
-    margin-top: 22px;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    background: #2563eb;
-    color: #ffffff;
-    font-size: 15px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-}
-
-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-.spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid #ffffff;
-    border-top: 2px solid transparent;
-    border-radius: 50%;
-    display: none;
-    animation: spin .8s linear infinite;
-}
-
-button.loading .spinner {
-    display: inline-block;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-}
-
-/* ===== Result Box ===== */
-.result-box {
-    margin-top: 18px;
-    padding: 16px;
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    border-radius: 12px;
-    text-align: center;
-    color: #065f46;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.8;
-    animation: fadeSlide .4s ease-out;
-}
-
-.result-box .icon {
-    font-size: 22px;
-    margin-bottom: 6px;
-    color: #059669;
-}
-
-.result-box .serial {
-    margin-top: 6px;
-    font-size: 16px;
-    color: #047857;
-}
-
-@keyframes fadeSlide {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
 </style>
+
 </head>
 
 <body>
 
-<div class="layout">
+<header>
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <h2>سجل الأرقام المحجوزة</h2>
-        <div class="log-title">الجلسة الحالية</div>
+<div>نظام إدخال معلومات الطلبة</div>
+<div>كلية التخطيط العمراني</div>
 
-        <div class="log-list" id="todayLog">
-            <div class="log-item">لا توجد عمليات حجز بعد</div>
-        </div>
+</header>
 
-        <!-- Footer inside Sidebar -->
-        <div class="sidebar-footer">
-            <div class="footer-box">
-                Powered by Ali Al-Waily<br>
-                الشؤون العلمية © 2026
-            </div>
-        </div>
-    </aside>
+<div class="container">
 
-    <!-- Content -->
-    <main class="content">
-        <div class="card">
-            <div class="card-header">
-                <h1>نظام الصادرة الإلكتروني</h1>
-                <h1>كلية التخطيط العمراني / الشؤون العلمية</h1>
-            </div>
+<h3 style="color:#004D40">إضافة معلومات الطالب</h3>
 
-            <label>القسم / الوحدة</label>
-            <select id="department">
-                <option value="">— اختر —</option>
-                <option value="science">التعليم المستمر</option>
-                <option value="accredit">الدراسات العليا</option>
-                <option value="research">الشؤون العلمية</option>
-                <option value="postgrad">الدراسات والتخطيط</option>
-                <option value="oofcs">مكتب المعاون العلمي</option>
-                <option value="ohuwm">التسجيل</option>
-                <option value="gatdu">وحدة حقوق الانسان</option>
-                <option value="gatda">وحدة الحاضنة وتكنلوجيا المعلومات</option>
-                <option value="sci">البعثات</option>
+<div id="formArea" class="form-grid"></div>
 
-            </select>
-
-            <button id="reserveBtn" onclick="reserve()">
-                <span>حجز رقم صادرة جديد</span>
-                <span class="spinner"></span>
-            </button>
-
-            <div id="result"></div>
-        </div>
-    </main>
+<div class="save-area">
+<button class="save-btn" onclick="saveData()">إضافة معلومات الطالب</button>
+</div>
 
 </div>
 
+<div class="footer">
+يتم الحفظ مباشرة في Google Sheet (information)
+</div>
+
 <script>
-const API_URL =
-"https://script.google.com/macros/s/AKfycbwbjCHOdsjdIquKRTurm6ZMS0fZm2wzAOZggWtq-Ic4bokRyvkNEGO0bqGLnziVph-vYQ/exec";
 
-function reserve() {
-    const btn = document.getElementById("reserveBtn");
-    const select = document.getElementById("department");
-    const deptClass = select.value;
-    const deptName = select.options[select.selectedIndex].text;
+// ================= CONFIG =================
 
-    if (!deptClass) {
-        alert("يرجى اختيار  القسم / الوحدة");
-        return;
-    }
+const API_URL = "PUT_YOUR_API_URL";
 
-    btn.disabled = true;
-    btn.classList.add("loading");
-    document.getElementById("result").innerHTML = "جارٍ حجز الرقم...";
+let headers = [];
+let studentIdIndex = -1;
 
-    fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "department=" + encodeURIComponent(deptName)
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById("result").innerHTML = `
-                <div class="result-box">
-                    <div class="icon">✓</div>
-                    تم حجز رقم الصادرة بنجاح
-                    <div class="serial">رقم الصادرة : ${data.serial}</div>
-                </div>
-            `;
-            addToLog(data.serial, deptName, deptClass);
-        }
-    })
-    .finally(() => {
-        btn.disabled = false;
-        btn.classList.remove("loading");
-    });
+// ================= LOAD HEADERS + NEXT STUDENT ID =================
+
+fetch(API_URL)
+.then(res => res.json())
+.then(data => {
+
+headers = data.headers;
+
+const nextId = data.nextId;
+
+studentIdIndex = headers.indexOf("رقم الطالب");
+
+buildForm(headers, nextId);
+
+});
+
+// ================= BUILD FORM =================
+
+function buildForm(cols, nextId){
+
+const form = document.getElementById("formArea");
+
+form.innerHTML = "";
+
+cols.forEach((col,index)=>{
+
+const div = document.createElement("div");
+div.className="field";
+
+let inputHTML = `<input id="f${index}" placeholder="${col}">`;
+
+// Auto Student ID Field
+if(col === "رقم الطالب"){
+inputHTML = `
+<input 
+id="f${index}" 
+value="${nextId}" 
+readonly
+style="background:#E0F2F1;font-weight:bold;color:#004D40">
+`;
 }
 
-function addToLog(serial, deptName, deptClass) {
-    const container = document.getElementById("todayLog");
+div.innerHTML = `
+<label>${col}</label>
+${inputHTML}
+`;
 
-    if (container.children[0]?.textContent.includes("لا توجد")) {
-        container.innerHTML = "";
-    }
+form.appendChild(div);
 
-    const div = document.createElement("div");
-    div.className = "log-item " + deptClass;
-    div.innerHTML =
-        "رقم صادرة: <b>" + serial + "</b><br>القسم: " + deptName;
+});
 
-    container.prepend(div);
 }
+
+// ================= VALIDATION =================
+
+function validate(){
+
+if(studentIdIndex === -1){
+alert("❌ لم يتم العثور على عمود (رقم الطالب) في Sheet information");
+return false;
+}
+
+// example mandatory field
+if(document.getElementById("f"+studentIdIndex).value == ""){
+alert("رقم الطالب غير موجود");
+return false;
+}
+
+return true;
+
+}
+
+// ================= SAVE DATA =================
+
+function saveData(){
+
+if(!validate()) return;
+
+let row=[];
+
+headers.forEach((h,i)=>{
+row.push(document.getElementById("f"+i).value);
+});
+
+fetch(API_URL,{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+row:row
+})
+})
+
+.then(res=>res.json())
+.then(d=>{
+
+alert("✅ تم حفظ معلومات الطالب بنجاح");
+
+// Reload to generate next student ID
+location.reload();
+
+});
+
+}
+
 </script>
 
 </body>
