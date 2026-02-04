@@ -411,40 +411,27 @@ function saveUpdate(){
   const row = ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
 
   post("update",{rowIndex:currentRowIndex,row})
-  .then(res=>{
+  .then(()=>{
+
+    // 🔥 تحديث الواجهة مباشرة من القيم المدخلة
+    ALL_COLUMNS.forEach((c,i)=>{
+      document.getElementById(c).value = row[i] || "";
+    });
 
     btn.innerHTML = "✅ تم الحفظ بنجاح";
 
-    // 🔥 إعادة جلب الطالب من الشيت بعد التعديل
-    const studentId = document.getElementById("رقم الطالب").value;
-
     setTimeout(()=>{
-      post("search",{query:studentId}).then(d=>{
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    },1200);
 
-        if(d.found){
-
-          // 🧨 مسح الحقول أولاً (إجبار التحديث)
-          ALL_COLUMNS.forEach(c=>{
-            document.getElementById(c).value="";
-          });
-
-          // 🧨 إعادة تعبئة من الشيت
-          ALL_COLUMNS.forEach((c,i)=>{
-            document.getElementById(c).value = d.row[i] || "";
-          });
-
-          // تحديث index
-          currentRowIndex = d.rowIndex;
-        }
-
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-
-      });
-    },600);
-
+  })
+  .catch(()=>{
+    btn.innerHTML="❌ فشل الحفظ";
+    btn.disabled=false;
   });
 }
+
 
 
 
