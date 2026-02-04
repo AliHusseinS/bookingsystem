@@ -2,31 +2,32 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>منظومة طلبة الدراسات العليا</title>
+<title>منظومة إدخال وتعديل بيانات الطلبة</title>
 
 <style>
-body{font-family:Tahoma;background:#F5F7F8;margin:0}
+body{margin:0;font-family:Tahoma;background:#F5F7F8}
 header{background:#00897B;color:#fff;padding:15px;font-size:20px}
 .tabs{display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:#fff}
-.tabs button{border:none;background:#E0F2F1;padding:8px 14px;border-radius:20px;cursor:pointer}
+.tabs button{border:none;background:#E0F2F1;padding:8px 14px;border-radius:20px;cursor:pointer;font-weight:bold}
 .tabs button.active{background:#00897B;color:#fff}
 .section{display:none;padding:20px}
 .section.active{display:block}
 .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
 .field{background:#fff;padding:10px;border-radius:8px}
-.field label{font-size:13px;font-weight:bold}
+.field label{font-size:13px;font-weight:bold;color:#004D40}
 .field input{width:100%;padding:7px;margin-top:4px}
 .actions{text-align:center;padding:15px}
 .actions button{padding:10px 20px;margin:5px}
+.search-bar{padding:10px;text-align:center;background:#E0F2F1}
 </style>
 </head>
 
 <body>
 
-<header>منظومة إدخال وتعديل بيانات الطلبة</header>
+<header>منظومة إدخال وتعديل بيانات الطلبة – كلية التخطيط العمراني</header>
 
-<div style="padding:10px;text-align:center;background:#E0F2F1">
-<input id="searchBox" placeholder="رقم الطالب أو الاسم الرباعي" style="width:300px;padding:7px">
+<div class="search-bar">
+<input id="searchBox" placeholder="رقم الطالب أو الاسم الرباعي" style="width:320px;padding:7px">
 <button onclick="searchStudent()">بحث</button>
 </div>
 
@@ -34,126 +35,58 @@ header{background:#00897B;color:#fff;padding:15px;font-size:20px}
 <div id="sections"></div>
 
 <div class="actions">
-<button onclick="addStudent()">إضافة طالب</button>
+<button onclick="addStudent()">إضافة طالب جديد</button>
 <button id="updateBtn" onclick="saveUpdate()" style="display:none">حفظ التعديلات</button>
 <button id="cancelBtn" onclick="location.reload()" style="display:none">إلغاء</button>
 </div>
 
 <script>
-// ===== ضع رابط Google Script هنا =====
+// ================== ضع رابط Google Script هنا ==================
 const API_URL = "https://script.google.com/macros/s/AKfycbwZOZO5c1JpjcqdvRs4JmciDp2Ofg5WhNoCJnHphprXLTHl3cYT_38R2MVTme5njkeT/exec";
 
+// ================== حالة النظام ==================
 let MODE = "ADD";
 let currentRowIndex = null;
 
-/* ===== الأعمدة (يدوياً – كما طلبت) ===== */
+// ================== جميع الأعمدة (كاملة بدون نقص) ==================
 const ALL_COLUMNS = [
 "رقم الطالب","المف الورقي","الاسم الرباعي واللقب","الجنس","تاريخ الميلاد",
 "سنة القبول","قناة القبول","الجامعة المقبول فيها","الكلية المقبول فيها","القسم المقبول فيه",
-"رقم الامر الجامعي بالقبول","تاريخ الامر الجامعي بالقبول","نوع القبول","نوع الدراسة",
-"رقم الموبايل","البريد الالكتروني",
+"رقم الامر الجامعي بالقبول","تاريخ الامر الجامعي بالقبول","التسلسل في الامر الجامعي",
+"نوع القبول","نوع الدراسة","اصل الدراسة","رقم الموبايل","البريد الالكتروني",
 "رقم وثيقة البكالوريوس","تاريخ وثيقة البكالوريوس","معدل البكلوريوس",
-"عنوان الرسالة باللغة العربية","عنوان الرسالة باللغة الإنكليزية",
-"اسم المشرف الأول","اللقب العلمي للمشرف1",
-"تاريخ المناقشة","درجة المناقشة","معدل الطالب النهائي",
-"رقم الامر الجامعي بالتخرج","تاريخ الامر الجامعي بالتخرج",
-"منظم الاستمارة","عميد الكلية"
-];
-
-/* ===== Tabs ===== */
-const TABS = {
-"بيانات أساسية": ALL_COLUMNS.slice(0,6),
-"القبول": ALL_COLUMNS.slice(6,14),
-"الاتصال": ALL_COLUMNS.slice(14,16),
-"الشهادات": ALL_COLUMNS.slice(16,19),
-"الإشراف": ALL_COLUMNS.slice(19,23),
-"المناقشة": ALL_COLUMNS.slice(23,26),
-"التخرج": ALL_COLUMNS.slice(26)
-};
-
-function buildUI(){
-const tabsDiv=document.getElementById("tabs");
-const secDiv=document.getElementById("sections");
-let first=true;
-
-for(const t in TABS){
-const btn=document.createElement("button");
-btn.textContent=t;
-if(first)btn.classList.add("active");
-btn.onclick=()=>openTab(t,btn);
-tabsDiv.appendChild(btn);
-
-const sec=document.createElement("div");
-sec.id=t;
-sec.className="section"+(first?" active":"");
-
-const grid=document.createElement("div");
-grid.className="form-grid";
-
-TABS[t].forEach(c=>{
-grid.innerHTML+=`
-<div class="field">
-<label>${c}</label>
-<input id="${c}" ${c==="رقم الطالب"?"readonly":""}>
-</div>`;
-});
-
-sec.appendChild(grid);
-secDiv.appendChild(sec);
-first=false;
-}
-}
-buildUI();
-
-/* ===== Tabs ===== */
-function openTab(id,btn){
-document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
-btn.classList.add("active");
-}
-
-/* ===== جلب رقم الطالب ===== */
-fetch(API_URL).then(r=>r.json()).then(d=>{
-document.getElementById("رقم الطالب").value=d.nextId;
-});
-
-/* ===== إضافة ===== */
-function addStudent(){
-if(MODE!=="ADD")return;
-const row=ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
-fetch(API_URL,{method:"POST",headers:{'Content-Type':'application/json'},
-body:JSON.stringify({action:"add",row})})
-.then(()=>alert("تمت الإضافة"));
-}
-
-/* ===== بحث ===== */
-function searchStudent(){
-const q=document.getElementById("searchBox").value.trim();
-if(!q)return;
-fetch(API_URL,{method:"POST",headers:{'Content-Type':'application/json'},
-body:JSON.stringify({action:"search",query:q})})
-.then(r=>r.json()).then(d=>{
-if(!d.found)return alert("غير موجود");
-if(confirm("الطالب موجود، هل تريد التعديل؟")){
-MODE="EDIT";
-currentRowIndex=d.rowIndex;
-ALL_COLUMNS.forEach((c,i)=>document.getElementById(c).value=d.row[i]||"");
-document.getElementById("updateBtn").style.display="inline-block";
-document.getElementById("cancelBtn").style.display="inline-block";
-}
-});
-}
-
-/* ===== تحديث ===== */
-function saveUpdate(){
-if(MODE!=="EDIT")return;
-const row=ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
-fetch(API_URL,{method:"POST",headers:{'Content-Type':'application/json'},
-body:JSON.stringify({action:"update",rowIndex:currentRowIndex,row})})
-.then(()=>alert("تم حفظ التعديلات"));
-}
-</script>
-
-</body>
-</html>
+"سنة التخرج لشهادة البكالوريوس","الجامعة التي تخرج منها للبكالوريوس",
+"الكلية التي تخرج منها للبكالوريوس","القسم التي تخرج منه للبكالوريوس",
+"رقم وثيقة الدبلوم العالي","تاريخ وثيقة الدبلوم العالي","معدل الدبلوم العالي",
+"سنة التخرج لشهادة الدبلوم العال","الجامعة التي تخرج منها",
+"الكلية التي تخرج منها للدبلوم العلي","القسم التي تخرج منه للدبلوم العلي",
+"رقم وثيقة الماجستير","تاريخ وثيقة الماجستير","معدل الماجستير",
+"سنة التخرج لشهادة الماجستير","الجامعة التي تخرج منها الماجستير",
+"الكلية التي تخرج منها الماجستير","القسم التي تخرج منه الماجستير",
+"كفاءة الحاسوب","كفاءة اللغة الإنكليزية","كفاءة اللغة العربية",
+"المعدل النسبي","درجة الامتحان التنافسي","معدل اساس المفاضلة",
+"التخصص العام للطالب","التخصص الدقيق للطالب",
+"رقم الامر الجامعي بالغاء القبول","تاريخ الامر الجامعي بالغاء القبول","سبب الغاء القبول",
+"رقم الامر الاداري بالمباشرة بالدراسة","تاريخ الامر الاداري بالمباشرة بالدراسة",
+"تاريخ المباشرة الفعلية","تاريخ انتهاء المدة","تاريخ انتهاء مدة الدراسة",
+"جهة انتساب الموظف (الوزارة - والدائرة)","رقم كتاب عدم الممانعة",
+"تاريخ كتاب عدم الممانعة","جهة عدم الممانعة","موظف في جامعة الكوفة",
+"رقم الامر الجامعي للتفرغ الكلي","تاريخ الامر الجامعي للتفرغ الكلي",
+"رقم كتاب الاجازة الدراسية","تاريخ كتاب الاجازة الدراسية",
+"رقم الامر الخاص بانفكاك الموظف من وظيفته ",
+"تاريخ الامر الخاص بانفكاك الموظف من وظيفته ",
+"رقم الامر الجامعي بالتفرغ الجزئي","تاريخ الامر الجامعي بالتفرغ الجزئي",
+"رقم تمديد الاجازة الدراسية","تاريخ تمديد الاجازة الدراسية",
+"رقم الامر الجامعي بالتاجيل الأول","تاريخ الامر الجامعي بالتاجيل الأول","سبب التاجيل الأول",
+"رقم الامر الجامعي بالتاجيل الثاني","تاريخ الامر الجامعي بالتاجيل الثاني","سبب التاجيل الثاني ",
+"الجهة المنقول منها","الجهة المنقول اليها","رقم الامر الجامعي بالنقل","تاريخ الامر الجامعي بالنقل",
+"رقم الامر الخاص بالانفكاك","تأريخ الامر الخاص بالانفكاك",
+"رقم الامر الخاص بالمباشرة بعد النقل","تأريخ الامر الخاص بالمباشرة بعد النقل",
+"رقم الامر الجامعي بالنقل1","تاريخ الامر الجامعي بالنقل1",
+"رقم صحة صدور وثيقة البكالوريوس","تاريخ صحة صدور وثيقة البكالوريوس",
+"رقم صحة صدور وثيقة الالماجستير","تاريخ صحة صدور وثيقة الالماجستير",
+"رقم صحة صدور البطاقة الوطنية او الجنسية","تاريخ صحة صدور البطاقة الوطنية او الجنسية",
+"رقم صحة صدور شهادة الجنسية","تاريخ صحة صدور شهادة الجنسية",
+"رقم صحة صدور استمارة ذوي الشهداء","تاريخ صحة صدور استمارة ذوي الشهداء",
+"رقم صحة صدور استمارة السجناء","تاريخ صحة صدور استمارة السجناء",
+"رقم صحة صدور استمارة ذوي الإعاقة","تا
