@@ -413,12 +413,24 @@ function saveUpdate(){
   post("update",{rowIndex:currentRowIndex,row})
     .then(()=>{
       btn.innerHTML = "✅ تم الحفظ بنجاح";
+
+      // 🔥 إعادة تحميل الطالب من الشيت بعد الحفظ
       setTimeout(()=>{
+        const id = document.getElementById("رقم الطالب").value;
+        post("search",{query:id}).then(d=>{
+          if(d.found){
+            ALL_COLUMNS.forEach((c,i)=>{
+              document.getElementById(c).value = d.row[i] || "";
+            });
+          }
+        });
+
         btn.innerHTML = originalText;
         btn.disabled = false;
-      },1500);
+      },800);
     });
 }
+
 
 
 /* ===== الإضافة فقط ===== */
