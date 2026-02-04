@@ -286,10 +286,25 @@ function searchStudent(){
 
 function saveUpdate(){
   if(MODE!=="EDIT") return;
-  const row=ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
+
+  const btn = document.getElementById("updateBtn");
+  const originalText = btn.innerHTML;
+
+  btn.disabled = true;
+  btn.innerHTML = "⏳ جارِ الحفظ...";
+
+  const row = ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
+
   post("update",{rowIndex:currentRowIndex,row})
-    .then(()=>alert("✅ تم حفظ التعديلات"));
+    .then(()=>{
+      btn.innerHTML = "✅ تم الحفظ بنجاح";
+      setTimeout(()=>{
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      },1500);
+    });
 }
+
 
 /* ===== الإضافة فقط ===== */
 function highlightMatch(text, query){
