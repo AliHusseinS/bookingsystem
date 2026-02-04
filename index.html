@@ -2,213 +2,78 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>منظومة طلبة الدراسات العليا</title>
+<title>منظومة الطلبة</title>
 
 <style>
+:root{
+  --primary:#00897B;
+  --accent:#E0F2F1;
+  --border:#CFD8DC;
+}
 body{margin:0;font-family:Tahoma;background:#F5F7F8}
-header{background:#00897B;color:#fff;padding:15px;font-size:20px}
-.tabs{display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:#fff}
-.tabs button{border:none;background:#E0F2F1;padding:8px 14px;border-radius:20px;cursor:pointer}
-.tabs button.active{background:#00897B;color:#fff}
-.section{display:none;padding:20px}
-.section.active{display:block}
-.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
-.field{background:#fff;padding:10px;border-radius:8px}
-.field label{font-size:13px;font-weight:bold;color:#004D40}
-.field input{width:100%;padding:7px;margin-top:4px}
-.actions{text-align:center;padding:15px}
-.search{padding:10px;text-align:center;background:#E0F2F1}
+header{background:var(--primary);color:#fff;padding:18px;font-size:22px}
+
+.search{
+  background:#fff;
+  margin:20px;
+  padding:16px;
+  border-radius:14px;
+  position:relative;
+}
+.search input{
+  width:340px;
+  padding:10px;
+  border:none;
+  border-bottom:2px solid var(--border);
+  outline:none;
+}
+.search input:focus{border-bottom-color:var(--primary)}
+.search button{
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  padding:10px 22px;
+  border-radius:30px;
+  cursor:pointer;
+}
+
+#suggestions{
+  position:absolute;
+  top:58px;
+  right:0;
+  width:340px;
+  background:#fff;
+  border-radius:10px;
+  box-shadow:0 8px 18px rgba(0,0,0,.15);
+  display:none;
+  z-index:999;
+}
+#suggestions div{
+  padding:10px;
+  cursor:pointer;
+}
+#suggestions div:hover{
+  background:var(--accent);
+}
 </style>
 </head>
 
 <body>
 
-<header>منظومة إدخال وتعديل بيانات الطلبة – كلية التخطيط العمراني</header>
+<header>منظومة إدخال وتعديل بيانات الطلبة</header>
 
 <div class="search">
-  <input id="searchBox" placeholder="رقم الطالب أو الاسم الرباعي" style="width:360px;padding:7px">
+  <input id="searchBox"
+         placeholder="اكتب اسم الطالب..."
+         oninput="suggestNames()">
   <button onclick="searchStudent()">بحث</button>
-</div>
-
-<div class="tabs" id="tabs"></div>
-<div id="sections"></div>
-
-<div class="actions">
-  <button onclick="addStudent()">إضافة طالب جديد</button>
-  <button id="updateBtn" onclick="saveUpdate()" style="display:none">حفظ التعديلات</button>
-  <button id="cancelBtn" onclick="location.reload()" style="display:none">إلغاء</button>
+  <div id="suggestions"></div>
 </div>
 
 <script>
-/* ================== API ================== */
-const API_URL = "https://script.google.com/macros/s/AKfycbyLyH5wuVPnuIFAX_-KfKwI2LcXC1y6HulYYrXxu1re_wg6RXGz1qORUwvQ5eD3WQP0/exec";
+const API_URL = "PUT_YOUR_SCRIPT_URL";
 
-/* ================== حالة ================== */
-let MODE = "ADD";
-let currentRowIndex = null;
-
-/* ================== الأعمدة (كاملة 100%) ================== */
-const ALL_COLUMNS = [
-"رقم الطالب","المف الورقي","الاسم الرباعي واللقب","الجنس","تاريخ الميلاد",
-"سنة القبول","قناة القبول","الجامعة المقبول فيها","الكلية المقبول فيها","القسم المقبول فيه",
-"رقم الامر الجامعي بالقبول","تاريخ الامر الجامعي بالقبول","التسلسل في الامر الجامعي",
-"نوع القبول","نوع الدراسة","اصل الدراسة","رقم الموبايل","البريد الالكتروني",
-"رقم وثيقة البكالوريوس","تاريخ وثيقة البكالوريوس","معدل البكلوريوس",
-"سنة التخرج لشهادة البكالوريوس","الجامعة التي تخرج منها للبكالوريوس",
-"الكلية التي تخرج منها للبكالوريوس","القسم التي تخرج منه للبكالوريوس",
-"رقم وثيقة الدبلوم العالي","تاريخ وثيقة الدبلوم العالي","معدل الدبلوم العالي",
-"سنة التخرج لشهادة الدبلوم العال","الجامعة التي تخرج منها",
-"الكلية التي تخرج منها للدبلوم العلي","القسم التي تخرج منه للدبلوم العلي",
-"رقم وثيقة الماجستير","تاريخ وثيقة الماجستير","معدل الماجستير",
-"سنة التخرج لشهادة الماجستير","الجامعة التي تخرج منها الماجستير",
-"الكلية التي تخرج منها الماجستير","القسم التي تخرج منه الماجستير",
-"كفاءة الحاسوب","كفاءة اللغة الإنكليزية","كفاءة اللغة العربية",
-"المعدل النسبي","درجة الامتحان التنافسي","معدل اساس المفاضلة",
-"التخصص العام للطالب","التخصص الدقيق للطالب",
-"رقم الامر الجامعي بالغاء القبول","تاريخ الامر الجامعي بالغاء القبول","سبب الغاء القبول",
-"رقم الامر الاداري بالمباشرة بالدراسة","تاريخ الامر الاداري بالمباشرة بالدراسة",
-"تاريخ المباشرة الفعلية","تاريخ انتهاء المدة","تاريخ انتهاء مدة الدراسة",
-"جهة انتساب الموظف (الوزارة - والدائرة)","رقم كتاب عدم الممانعة",
-"تاريخ كتاب عدم الممانعة","جهة عدم الممانعة","موظف في جامعة الكوفة",
-"رقم الامر الجامعي للتفرغ الكلي","تاريخ الامر الجامعي للتفرغ الكلي",
-"رقم كتاب الاجازة الدراسية","تاريخ كتاب الاجازة الدراسية",
-"رقم الامر الخاص بانفكاك الموظف من وظيفته ",
-"تاريخ الامر الخاص بانفكاك الموظف من وظيفته ",
-"رقم الامر الجامعي بالتفرغ الجزئي","تاريخ الامر الجامعي بالتفرغ الجزئي",
-"رقم تمديد الاجازة الدراسية","تاريخ تمديد الاجازة الدراسية",
-"رقم الامر الجامعي بالتاجيل الأول","تاريخ الامر الجامعي بالتاجيل الأول","سبب التاجيل الأول",
-"رقم الامر الجامعي بالتاجيل الثاني","تاريخ الامر الجامعي بالتاجيل الثاني","سبب التاجيل الثاني ",
-"الجهة المنقول منها","الجهة المنقول اليها","رقم الامر الجامعي بالنقل","تاريخ الامر الجامعي بالنقل",
-"رقم الامر الخاص بالانفكاك","تأريخ الامر الخاص بالانفكاك",
-"رقم الامر الخاص بالمباشرة بعد النقل","تأريخ الامر الخاص بالمباشرة بعد النقل",
-"رقم الامر الجامعي بالنقل1","تاريخ الامر الجامعي بالنقل1",
-"رقم صحة صدور وثيقة البكالوريوس","تاريخ صحة صدور وثيقة البكالوريوس",
-"رقم صحة صدور وثيقة الالماجستير","تاريخ صحة صدور وثيقة الالماجستير",
-"رقم صحة صدور البطاقة الوطنية او الجنسية","تاريخ صحة صدور البطاقة الوطنية او الجنسية",
-"رقم صحة صدور شهادة الجنسية","تاريخ صحة صدور شهادة الجنسية",
-"رقم صحة صدور استمارة ذوي الشهداء","تاريخ صحة صدور استمارة ذوي الشهداء",
-"رقم صحة صدور استمارة السجناء","تاريخ صحة صدور استمارة السجناء",
-"رقم صحة صدور استمارة ذوي الإعاقة","تاريخ صحة صدور استمارة ذوي الإعاقة",
-"رقم الامر الجامعي بالترقين الأول","تاريخ الامر الجامعي بالترقين الأول",
-"سبب الترقين الأول","مرحلة الترقين الأول",
-"رقم الامر الجامعي بالاعادة للدراسة","تاريخ الامر الجامعي بالاعادة للدراسة",
-"سبب العودة بالترقين الأول",
-"رقم الامر الجامعي بالترقين الثاني","تاريخ الامر الجامعي بالترقين الثاني",
-"سبب الترقين الثاني","مرحلة الترقين الثاني",
-"رقم كتاب الاعادة للدراسة بالترقين الثاني",
-"تاريخ كتاب الاعادة للدراسة  بالترقين الثاني",
-"سبب العودة بالترقين الثاني",
-"رقم كتاب تشكيل لجنة إقرار البحث","تاريخ كتاب تشكيل لجنة إقرار البحث",
-"عنوان الرسالة باللغة العربية","عنوان الرسالة باللغة الإنكليزية",
-"اللقب العلمي للمشرف1","اسم المشرف الأول",
-"التخصص العام للمشرف الأول","التخصص الدقيق للمشرف الاول","مكان العمل للمشرف الاول",
-"رقم الامر الإداري بالمشرف الأول","تاريخ الامر الإداري بالمشرف الأول",
-"اللقب العلمي للمشرف2","اسم المشرف الثاني",
-"التخصص العام للمشرف الثاني","التخصص الدقيق للمشرف الثاني","مكان العمل للمشرف الثاني",
-"رقم الامر الإداري بالمشرف الثاني","تاريخ الامر الإداري بالمشرف الثاني",
-"تمديد اولي","رقم كتاب التمديد الأول","تاريخ كتاب التمديد الأول",
-"تاريخ بداية التمديد الأول","تاريخ نهاية التمديد الأول",
-"تمديد ثاني","رقم كتاب التمديد الثاني","تاريخ كتاب التمديد الثاني",
-"تاريخ بداية التمديد الثاني","تاريخ نهاية التمديد الثاني",
-"تمديد استثنائي اولي","رقم كتاب التمديد استثنائي اولي",
-"تاريخ كتاب التمديد استثنائي اولي",
-"تاريخ بداية التمديد استثنائي اول","تاريخ نهاية التمديد استثنائي اول",
-"تمديد استثنائي ثاني","رقم كتاب التمديد استثنائي ثاني",
-"تاريخ كتاب التمديد استثنائي ثاني",
-"تاريخ بداية التمديد استثنائي ثاني","تاريخ نهاية التمديد استثنائي ثاني",
-"تاريخ تسليم الرسالة او الاطروحة الى القسم العلمي",
-"رقم كتاب تسليم الرسالة او الاطروحة",
-"تاريخ كتاب تسليم الرسالة او الاطروحة",
-"اللقب العلمي-العلمي","اسم المقوم العلمي",
-"الاختصاص العام-العلمي","الاختصاص الدقيق-العلمي","مكان العمل-العلمي",
-"رقم كتاب التقويم العلمي","تاريخ كتاب التقويم العلمي",
-"اللقب العلمي-العلمي2","اسم المقوم العلمي2",
-"الاختصاص العام-العلمي2","الاختصاص الدقيق-العلمي2","مكان العمل-العلمي2",
-"رقم كتاب التقويم العلمي2","تاريخ كتاب التقويم العلمي2",
-"اللقب العلمي-اللغوي","اسم المقوم اللغوي",
-"الاختصاص العام-اللغوي","الاختصاص الدقيق-اللغوي","مكان العمل-اللغوي",
-"رقم كتاب التقويم اللغوي","تاريخ كتاب التقويم اللغوي",
-"رقم محضر تشكيل لجنة المناقشة","تاريخ محضر تشكيل لجنة المناقشة",
-"تاريخ المناقشة","الوقت (كتابتا)","اسم اليوم (كتابتا)","اسم القاعة",
-"رقم الامر الإداري بتشكيل لجنة المناقشة",
-"تاريخ الامر الإداري بتشكيل لجنة المناقشة",
-"اللقب العلمي لجنة1","اسم عضو لجنة المناقشة1","التخصص العام1",
-"التخصص الدقيق1","مكان العمل1","رئيسا",
-"اللقب العلمي لجنة2","اسم عضو لجنة المناقشة2","التخصص العام2",
-"التخصص الدقيق2","مكان العمل2","عضوا2",
-"اللقب العلمي لجنة3","اسم عضو لجنة المناقشة3","التخصص العام3",
-"التخصص الدقيق3","مكان العمل3","عضوا3",
-"اللقب العلمي لجنة4","اسم عضو لجنة المناقشة4","التخصص العام4",
-"التخصص الدقيق4","مكان العمل4","عضوا4",
-"اللقب العلمي لجنة5","اسم عضو لجنة المناقشة5","التخصص العام5",
-"التخصص الدقيق5","مكان العمل5","عضوا5",
-"اللقب العلمي لجنة6","اسم عضو لجنة المناقشة6","التخصص العام6",
-"التخصص الدقيق6","مكان العمل6","عضوا6",
-"اللقب العلمي لجنة7","اسم عضو لجنة المناقشة7","التخصص العام7",
-"التخصص الدقيق7","مكان العمل7","عضوا7",
-"رقم كتاب المصادقة على منح الشهادة","تاريخ كتاب المصادقة على منح الشهادة",
-"درجة الفصل الاول","درجة الفصل الثاني","معدل الدور الاول","معدل الدور الثاني",
-"الدور الذي نجح فيه","معدل الامتحان التكميلي","معدل السنة التحضيرية",
-"درجة المناقشة","معدل الطالب النهائي","تقدير الطالب النهائي",
-"رقم الامر الجامعي بالتخرج","تاريخ الامر الجامعي بالتخرج","سنة التخرج",
-"منظم الاستمارة","مقرر الدراسات العليا","رئيس القسم",
-"معاون العميد للشؤون العلمية والدراسات العليا","عميد الكلية","عمود1"
-];
-
-/* ================== Tabs ================== */
-const TABS = {
-  "البيانات الأساسية": ALL_COLUMNS.slice(0,18),
-  "القبول والدراسة": ALL_COLUMNS.slice(18,48),
-  "الشهادات": ALL_COLUMNS.slice(48,78),
-  "الإجراءات الإدارية": ALL_COLUMNS.slice(78,120),
-  "الإشراف والبحث": ALL_COLUMNS.slice(120,155),
-  "التمديدات والتأجيل": ALL_COLUMNS.slice(155,190),
-  "المناقشة": ALL_COLUMNS.slice(190,235),
-  "التخرج والتواقيع": ALL_COLUMNS.slice(235)
-};
-
-/* ================== بناء الواجهة ================== */
-(function buildUI(){
-  const tabs=document.getElementById("tabs");
-  const secs=document.getElementById("sections");
-  let first=true;
-
-  for(const t in TABS){
-    const b=document.createElement("button");
-    b.textContent=t;
-    if(first) b.classList.add("active");
-    b.onclick=()=>openTab(t,b);
-    tabs.appendChild(b);
-
-    const sec=document.createElement("div");
-    sec.id=t;
-    sec.className="section"+(first?" active":"");
-
-    const grid=document.createElement("div");
-    grid.className="form-grid";
-
-    TABS[t].forEach(c=>{
-      grid.innerHTML+=`
-        <div class="field">
-          <label>${c}</label>
-          <input id="${c}" ${c==="رقم الطالب"?"readonly":""}>
-        </div>`;
-    });
-
-    sec.appendChild(grid);
-    secs.appendChild(sec);
-    first=false;
-  }
-})();
-
-function openTab(id,btn){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-}
-
-/* ================== POST بدون CORS ================== */
+/* POST */
 function post(action,payload){
   const f=new FormData();
   f.append("action",action);
@@ -216,42 +81,44 @@ function post(action,payload){
   return fetch(API_URL,{method:"POST",body:f}).then(r=>r.json());
 }
 
-/* ================== رقم الطالب ================== */
-fetch(API_URL).then(r=>r.json()).then(d=>{
-  document.getElementById("رقم الطالب").value=d.nextId;
-});
+/* Autocomplete ذكي */
+function suggestNames(){
+  const q=document.getElementById("searchBox").value.trim();
+  const box=document.getElementById("suggestions");
 
-/* ================== إضافة ================== */
-function addStudent(){
-  if(MODE!=="ADD") return;
-  const row=ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
-  post("add",{row}).then(()=>alert("✅ تمت إضافة الطالب بنجاح"));
+  if(q.length<2){
+    box.style.display="none";
+    return;
+  }
+
+  post("suggest",{query:q}).then(d=>{
+    box.innerHTML="";
+    if(!d.suggestions.length){
+      box.style.display="none";
+      return;
+    }
+
+    d.suggestions.forEach(name=>{
+      const div=document.createElement("div");
+      div.textContent=name;
+      div.onclick=()=>{
+        document.getElementById("searchBox").value=name;
+        box.style.display="none";
+      };
+      box.appendChild(div);
+    });
+    box.style.display="block";
+  });
 }
 
-/* ================== بحث ================== */
+/* البحث الأصلي */
 function searchStudent(){
   const q=document.getElementById("searchBox").value.trim();
   if(!q) return;
   post("search",{query:q}).then(d=>{
-    if(!d.found) return alert("❌ الطالب غير موجود");
-    if(confirm("الطالب موجود، هل تريد تعديل بياناته؟")){
-      MODE="EDIT";
-      currentRowIndex=d.rowIndex;
-      ALL_COLUMNS.forEach((c,i)=>{
-        document.getElementById(c).value=d.row[i]||"";
-      });
-      document.getElementById("updateBtn").style.display="inline-block";
-      document.getElementById("cancelBtn").style.display="inline-block";
-    }
+    if(!d.found) alert("❌ الطالب غير موجود");
+    else alert("✔ تم العثور على الطالب");
   });
-}
-
-/* ================== حفظ التعديل ================== */
-function saveUpdate(){
-  if(MODE!=="EDIT") return;
-  const row=ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
-  post("update",{rowIndex:currentRowIndex,row})
-    .then(()=>alert("✅ تم حفظ التعديلات"));
 }
 </script>
 
