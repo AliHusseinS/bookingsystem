@@ -413,25 +413,32 @@ function saveUpdate(){
   post("update",{rowIndex:currentRowIndex,row})
   .then(()=>{
 
-    // 🔥 تحديث الواجهة مباشرة من القيم المدخلة
-    ALL_COLUMNS.forEach((c,i)=>{
-      document.getElementById(c).value = row[i] || "";
-    });
+    // 🔥 بعد الحفظ أعد جلب الطالب من الشيت للتأكيد
+    const studentId = document.getElementById("رقم الطالب").value;
+
+    return post("search",{query:studentId});
+  })
+  .then(d=>{
+
+    if(d && d.found){
+      ALL_COLUMNS.forEach((c,i)=>{
+        document.getElementById(c).value = d.row[i] || "";
+      });
+    }
 
     btn.innerHTML = "✅ تم الحفظ بنجاح";
 
     setTimeout(()=>{
       btn.innerHTML = originalText;
       btn.disabled = false;
-    },1200);
+    },1500);
 
   })
   .catch(()=>{
-    btn.innerHTML="❌ فشل الحفظ";
+    btn.innerHTML="❌ خطأ بالحفظ";
     btn.disabled=false;
   });
 }
-
 
 
 
