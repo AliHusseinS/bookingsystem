@@ -5,106 +5,23 @@
 <title>منظومة إدخال وتعديل بيانات الطلبة</title>
 
 <style>
-body{
-margin:0;
-font-family:Tahoma;
-background:#F5F7F8;
-}
-
-header{
-background:#00897B;
-color:white;
-padding:16px 30px;
-font-size:20px;
-font-weight:bold;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-.tabs{
-display:flex;
-gap:6px;
-padding:10px;
-background:#ffffff;
-border-bottom:3px solid #00897B;
-justify-content:center;
-}
-
-.tabs button{
-border:none;
-background:#E0F2F1;
-padding:8px 16px;
-border-radius:20px;
-cursor:pointer;
-font-weight:bold;
-color:#004D40;
-}
-
-.tabs button.active{
-background:#00897B;
-color:white;
-}
-
-.section{
-display:none;
-padding:20px;
-}
-
-.section.active{
-display:block;
-}
-
-.form-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-gap:14px;
-}
-
-.field{
-background:white;
-padding:10px;
-border-radius:10px;
-box-shadow:0 2px 5px rgba(0,0,0,.05);
-}
-
-.field label{
-font-size:13px;
-font-weight:bold;
-color:#004D40;
-}
-
-.field input{
-width:100%;
-padding:8px;
-margin-top:5px;
-border-radius:6px;
-border:1px solid #ccc;
-}
-
-.actions{
-text-align:center;
-padding:15px;
-}
-
-.actions button{
-padding:10px 20px;
-border:none;
-border-radius:6px;
-font-size:14px;
-cursor:pointer;
-margin:5px;
-}
-
-.add-btn{background:#00897B;color:white;}
-.update-btn{background:#FF9800;color:white;}
-.search-btn{background:#00695C;color:white;}
-
-.search-bar{
-padding:15px;
-background:#E0F2F1;
-text-align:center;
-}
+body{margin:0;font-family:Tahoma;background:#F5F7F8}
+header{background:#00897B;color:#fff;padding:15px 30px;font-size:20px;font-weight:bold;display:flex;justify-content:space-between}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:#fff;border-bottom:3px solid #00897B}
+.tabs button{border:none;background:#E0F2F1;padding:8px 14px;border-radius:20px;cursor:pointer;font-weight:bold;color:#004D40}
+.tabs button.active{background:#00897B;color:#fff}
+.section{display:none;padding:20px}
+.section.active{display:block}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.field{background:#fff;padding:10px;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,.05)}
+.field label{font-size:13px;font-weight:bold;color:#004D40}
+.field input{width:100%;padding:8px;margin-top:5px;border-radius:6px;border:1px solid #ccc}
+.actions{text-align:center;padding:15px}
+.actions button{padding:10px 20px;border:none;border-radius:6px;font-size:14px;cursor:pointer;margin:5px}
+.add-btn{background:#00897B;color:#fff}
+.update-btn{background:#FF9800;color:#fff;display:none}
+.cancel-btn{background:#9E9E9E;color:#fff;display:none}
+.search-bar{padding:15px;background:#E0F2F1;text-align:center}
 </style>
 </head>
 
@@ -115,47 +32,41 @@ text-align:center;
 <div>كلية التخطيط العمراني</div>
 </header>
 
-<!-- ===== SEARCH ===== -->
+<!-- SEARCH -->
 <div class="search-bar">
 <input id="searchBox" placeholder="رقم الطالب أو الاسم الرباعي"
-style="padding:8px;width:300px;border-radius:6px;border:1px solid #ccc">
-<button class="search-btn" onclick="searchStudent()">بحث</button>
+style="padding:8px;width:320px;border-radius:6px;border:1px solid #ccc">
+<button onclick="searchStudent()">بحث</button>
 </div>
 
-<!-- ===== TABS ===== -->
-<div class="tabs">
-<button class="active" onclick="openTab('tab1',this)">البيانات الأساسية</button>
-<button onclick="openTab('tab2',this)">الدراسة والقبول</button>
-<button onclick="openTab('tab3',this)">الشهادات</button>
-<button onclick="openTab('tab4',this)">الإشراف والمناقشة</button>
-<button onclick="openTab('tab5',this)">التخرج والتواقيع</button>
-</div>
+<!-- TABS -->
+<div class="tabs" id="tabs"></div>
 
-<div id="tab1" class="section active"><div id="form1" class="form-grid"></div></div>
-<div id="tab2" class="section"><div id="form2" class="form-grid"></div></div>
-<div id="tab3" class="section"><div id="form3" class="form-grid"></div></div>
-<div id="tab4" class="section"><div id="form4" class="form-grid"></div></div>
-<div id="tab5" class="section"><div id="form5" class="form-grid"></div></div>
+<div id="sections"></div>
 
 <div class="actions">
 <button class="add-btn" onclick="addStudent()">إضافة طالب جديد</button>
-<button class="update-btn" onclick="saveUpdate()">حفظ التعديلات</button>
+<button class="update-btn" id="updateBtn" onclick="saveUpdate()">حفظ التعديلات</button>
+<button class="cancel-btn" id="cancelBtn" onclick="cancelEdit()">إلغاء</button>
 </div>
 
 <script>
-// ================= CONFIG =================
 const API_URL = "https://script.google.com/macros/s/AKfycbwPdB9DDyj3VIPM7QBg6_v_O-wxZpca5BoN0GuA2LJtk01Cqh-eakmIn_z3ZVcyBfYm/exec";
 let currentRowIndex = null;
+let editMode = false;
 
-// ================= ALL COLUMNS =================
+/* ===== ALL COLUMNS (FULL – SAME ORDER AS SHEET) ===== */
 const allColumns = [
 "رقم الطالب","المف الورقي","الاسم الرباعي واللقب","الجنس","تاريخ الميلاد",
 "سنة القبول","قناة القبول","الجامعة المقبول فيها","الكلية المقبول فيها","القسم المقبول فيه",
 "رقم الامر الجامعي بالقبول","تاريخ الامر الجامعي بالقبول","التسلسل في الامر الجامعي",
 "نوع القبول","نوع الدراسة","اصل الدراسة","رقم الموبايل","البريد الالكتروني",
 "رقم وثيقة البكالوريوس","تاريخ وثيقة البكالوريوس","معدل البكلوريوس",
-"سنة التخرج لشهادة البكلوريوس","الجامعة التي تخرج منها للبكالوريوس",
+"سنة التخرج لشهادة البكالوريوس","الجامعة التي تخرج منها للبكالوريوس",
 "الكلية التي تخرج منها للبكالوريوس","القسم التي تخرج منه للبكالوريوس",
+"رقم وثيقة الدبلوم العالي","تاريخ وثيقة الدبلوم العالي","معدل الدبلوم العالي",
+"سنة التخرج لشهادة الدبلوم العال","الجامعة التي تخرج منها",
+"الكلية التي تخرج منها للدبلوم العلي","القسم التي تخرج منه للدبلوم العلي",
 "رقم وثيقة الماجستير","تاريخ وثيقة الماجستير","معدل الماجستير",
 "سنة التخرج لشهادة الماجستير","الجامعة التي تخرج منها الماجستير",
 "الكلية التي تخرج منها الماجستير","القسم التي تخرج منه الماجستير",
@@ -163,37 +74,50 @@ const allColumns = [
 "اسم المشرف الأول","اللقب العلمي للمشرف1",
 "تاريخ المناقشة","درجة المناقشة","معدل الطالب النهائي","تقدير الطالب النهائي",
 "رقم الامر الجامعي بالتخرج","تاريخ الامر الجامعي بالتخرج",
-"منظم الاستمارة","مقرر الدراسات العليا","رئيس القسم","عميد الكلية"
+"منظم الاستمارة","مقرر الدراسات العليا","رئيس القسم",
+"معاون العميد للشؤون العلمية والدراسات العليا","عميد الكلية","عمود1"
 ];
 
-// ===== تقسيم الأعمدة على Tabs =====
-const tab1 = allColumns.slice(0,10);
-const tab2 = allColumns.slice(10,20);
-const tab3 = allColumns.slice(20,30);
-const tab4 = allColumns.slice(30,40);
-const tab5 = allColumns.slice(40);
+/* ===== TABS CONFIG ===== */
+const tabsConfig = {
+"البيانات الأساسية": allColumns.slice(0,10),
+"القبول والدراسة": allColumns.slice(10,18),
+"الشهادات السابقة": allColumns.slice(18,33),
+"الإشراف والبحث": allColumns.slice(33,42),
+"المناقشة والتخرج": allColumns.slice(42,55),
+"معلومات أخرى": allColumns.slice(55)
+};
 
-// ================= BUILD FORMS =================
-function buildForm(cols,target){
-let html="";
-cols.forEach(c=>{
-let ro = c==="رقم الطالب" ? "readonly" : "";
-html+=`
+/* ===== BUILD UI ===== */
+const tabsDiv=document.getElementById("tabs");
+const sectionsDiv=document.getElementById("sections");
+let first=true;
+
+for(let tab in tabsConfig){
+let btn=document.createElement("button");
+btn.innerText=tab;
+btn.onclick=()=>openTab(tab,btn);
+if(first)btn.classList.add("active");
+tabsDiv.appendChild(btn);
+
+let sec=document.createElement("div");
+sec.id=tab;
+sec.className="section"+(first?" active":"");
+let grid=document.createElement("div");
+grid.className="form-grid";
+
+tabsConfig[tab].forEach(c=>{
+grid.innerHTML+=`
 <div class="field">
 <label>${c}</label>
-<input id="${c}" ${ro}>
+<input id="${c}" ${c==="رقم الطالب"?"readonly":""}>
 </div>`;
 });
-document.getElementById(target).innerHTML = html;
+sec.appendChild(grid);
+sectionsDiv.appendChild(sec);
+first=false;
 }
 
-buildForm(tab1,"form1");
-buildForm(tab2,"form2");
-buildForm(tab3,"form3");
-buildForm(tab4,"form4");
-buildForm(tab5,"form5");
-
-// ================= TAB CONTROL =================
 function openTab(id,btn){
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
@@ -201,54 +125,53 @@ document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"
 btn.classList.add("active");
 }
 
-// ================= LOAD NEXT ID =================
-fetch(API_URL)
-.then(r=>r.json())
-.then(d=>{
-document.getElementById("رقم الطالب").value = d.nextId;
+/* ===== LOAD NEXT ID ===== */
+fetch(API_URL).then(r=>r.json()).then(d=>{
+document.getElementById("رقم الطالب").value=d.nextId;
 });
 
-// ================= ADD =================
+/* ===== ADD ===== */
 function addStudent(){
 let row=[];
 allColumns.forEach(c=>row.push(document.getElementById(c).value));
-fetch(API_URL,{
-method:"POST",
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({action:"add",row:row})
-}).then(()=>{alert("تمت الإضافة");location.reload();});
+fetch(API_URL,{method:"POST",headers:{'Content-Type':'application/json'},
+body:JSON.stringify({action:"add",row})})
+.then(()=>alert("تمت إضافة الطالب بنجاح"));
 }
 
-// ================= SEARCH =================
+/* ===== SEARCH ===== */
 function searchStudent(){
 let q=document.getElementById("searchBox").value.trim();
-if(!q){alert("ادخل رقم الطالب او الاسم");return;}
-fetch(API_URL,{
-method:"POST",
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({action:"search",query:q})
-})
+if(!q)return alert("ادخل رقم الطالب او الاسم");
+
+fetch(API_URL,{method:"POST",headers:{'Content-Type':'application/json'},
+body:JSON.stringify({action:"search",query:q})})
 .then(r=>r.json())
 .then(d=>{
-if(!d.found){alert("غير موجود");return;}
+if(!d.found)return alert("الطالب غير موجود");
+if(confirm(`الطالب ${d.row[2]} موجود\nهل تريد تعديل بياناته؟`)){
+editMode=true;
 currentRowIndex=d.rowIndex;
-allColumns.forEach((c,i)=>{
-document.getElementById(c).value=d.row[i]||"";
-});
-alert("تم تحميل البيانات للتعديل");
+allColumns.forEach((c,i)=>document.getElementById(c).value=d.row[i]||"");
+document.getElementById("updateBtn").style.display="inline-block";
+document.getElementById("cancelBtn").style.display="inline-block";
+}
 });
 }
 
-// ================= UPDATE =================
+/* ===== UPDATE ===== */
 function saveUpdate(){
-if(!currentRowIndex){alert("ابحث عن طالب اولاً");return;}
+if(!editMode)return;
 let row=[];
 allColumns.forEach(c=>row.push(document.getElementById(c).value));
-fetch(API_URL,{
-method:"POST",
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({action:"update",rowIndex:currentRowIndex,row:row})
-}).then(()=>{alert("تم حفظ التعديلات");location.reload();});
+fetch(API_URL,{method:"POST",headers:{'Content-Type':'application/json'},
+body:JSON.stringify({action:"update",rowIndex:currentRowIndex,row})})
+.then(()=>alert("تم حفظ التعديلات بنجاح"));
+}
+
+/* ===== CANCEL ===== */
+function cancelEdit(){
+location.reload();
 }
 </script>
 
