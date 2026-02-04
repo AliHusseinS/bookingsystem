@@ -2,10 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>نظام إدخال معلومات الطلبة</title>
+<title>منظومة إدخال وتعديل بيانات الطلبة</title>
 
 <style>
-
 body{
 margin:0;
 font-family:Tahoma;
@@ -21,11 +20,39 @@ font-weight:bold;
 display:flex;
 justify-content:space-between;
 align-items:center;
-border-radius:0 0 12px 12px;
 }
 
-.container{
-padding:25px;
+.tabs{
+display:flex;
+gap:6px;
+padding:10px;
+background:#ffffff;
+border-bottom:3px solid #00897B;
+justify-content:center;
+}
+
+.tabs button{
+border:none;
+background:#E0F2F1;
+padding:8px 16px;
+border-radius:20px;
+cursor:pointer;
+font-weight:bold;
+color:#004D40;
+}
+
+.tabs button.active{
+background:#00897B;
+color:white;
+}
+
+.section{
+display:none;
+padding:20px;
+}
+
+.section.active{
+display:block;
 }
 
 .form-grid{
@@ -53,153 +80,176 @@ padding:8px;
 margin-top:5px;
 border-radius:6px;
 border:1px solid #ccc;
-font-size:14px;
 }
 
-.save-area{
-margin-top:25px;
+.actions{
 text-align:center;
+padding:15px;
 }
 
-.save-btn{
-background:linear-gradient(to right,#00796B,#004D40);
-color:white;
+.actions button{
+padding:10px 20px;
 border:none;
-padding:14px 45px;
-border-radius:30px;
-font-size:17px;
+border-radius:6px;
+font-size:14px;
 cursor:pointer;
-box-shadow:0 4px 10px rgba(0,0,0,.2);
+margin:5px;
 }
 
-.save-btn:hover{
-opacity:0.9;
-}
+.add-btn{background:#00897B;color:white;}
+.update-btn{background:#FF9800;color:white;}
+.search-btn{background:#00695C;color:white;}
 
-.footer{
-margin-top:25px;
+.search-bar{
+padding:15px;
 background:#E0F2F1;
-padding:12px;
 text-align:center;
-font-weight:bold;
-color:#004D40;
-border-radius:12px;
 }
-
 </style>
 </head>
 
 <body>
 
 <header>
-<div>نظام إدخال معلومات الطلبة</div>
+<div>منظومة إدخال وتعديل بيانات الطلبة</div>
 <div>كلية التخطيط العمراني</div>
 </header>
 
-<div class="container">
-
-<h3 style="color:#004D40">إضافة معلومات الطالب</h3>
-
-<div id="formArea" class="form-grid"></div>
-
-<div class="save-area">
-<button class="save-btn" onclick="saveData()">إضافة معلومات الطالب</button>
+<!-- ===== SEARCH ===== -->
+<div class="search-bar">
+<input id="searchBox" placeholder="رقم الطالب أو الاسم الرباعي"
+style="padding:8px;width:300px;border-radius:6px;border:1px solid #ccc">
+<button class="search-btn" onclick="searchStudent()">بحث</button>
 </div>
 
+<!-- ===== TABS ===== -->
+<div class="tabs">
+<button class="active" onclick="openTab('tab1',this)">البيانات الأساسية</button>
+<button onclick="openTab('tab2',this)">الدراسة والقبول</button>
+<button onclick="openTab('tab3',this)">الشهادات</button>
+<button onclick="openTab('tab4',this)">الإشراف والمناقشة</button>
+<button onclick="openTab('tab5',this)">التخرج والتواقيع</button>
 </div>
 
-<div class="footer">
-يتم الحفظ مباشرة في Google Sheet (information)
+<div id="tab1" class="section active"><div id="form1" class="form-grid"></div></div>
+<div id="tab2" class="section"><div id="form2" class="form-grid"></div></div>
+<div id="tab3" class="section"><div id="form3" class="form-grid"></div></div>
+<div id="tab4" class="section"><div id="form4" class="form-grid"></div></div>
+<div id="tab5" class="section"><div id="form5" class="form-grid"></div></div>
+
+<div class="actions">
+<button class="add-btn" onclick="addStudent()">إضافة طالب جديد</button>
+<button class="update-btn" onclick="saveUpdate()">حفظ التعديلات</button>
 </div>
 
 <script>
-
 // ================= CONFIG =================
+const API_URL = "https://script.google.com/macros/s/AKfycbwPdB9DDyj3VIPM7QBg6_v_O-wxZpca5BoN0GuA2LJtk01Cqh-eakmIn_z3ZVcyBfYm/exec";
+let currentRowIndex = null;
 
-const API_URL = "https://script.google.com/macros/s/AKfycbydX4To_0ZDA3_ZExCmZQd8gS-cLe_rBLmyeZ5T7TgF28CVWSzo5NxpKmcGchYajyHy/exec";
+// ================= ALL COLUMNS =================
+const allColumns = [
+"رقم الطالب","المف الورقي","الاسم الرباعي واللقب","الجنس","تاريخ الميلاد",
+"سنة القبول","قناة القبول","الجامعة المقبول فيها","الكلية المقبول فيها","القسم المقبول فيه",
+"رقم الامر الجامعي بالقبول","تاريخ الامر الجامعي بالقبول","التسلسل في الامر الجامعي",
+"نوع القبول","نوع الدراسة","اصل الدراسة","رقم الموبايل","البريد الالكتروني",
+"رقم وثيقة البكالوريوس","تاريخ وثيقة البكالوريوس","معدل البكلوريوس",
+"سنة التخرج لشهادة البكلوريوس","الجامعة التي تخرج منها للبكالوريوس",
+"الكلية التي تخرج منها للبكالوريوس","القسم التي تخرج منه للبكالوريوس",
+"رقم وثيقة الماجستير","تاريخ وثيقة الماجستير","معدل الماجستير",
+"سنة التخرج لشهادة الماجستير","الجامعة التي تخرج منها الماجستير",
+"الكلية التي تخرج منها الماجستير","القسم التي تخرج منه الماجستير",
+"عنوان الرسالة باللغة العربية","عنوان الرسالة باللغة الإنكليزية",
+"اسم المشرف الأول","اللقب العلمي للمشرف1",
+"تاريخ المناقشة","درجة المناقشة","معدل الطالب النهائي","تقدير الطالب النهائي",
+"رقم الامر الجامعي بالتخرج","تاريخ الامر الجامعي بالتخرج",
+"منظم الاستمارة","مقرر الدراسات العليا","رئيس القسم","عميد الكلية"
+];
 
-let headers = [];
-let studentIdIndex = -1;
+// ===== تقسيم الأعمدة على Tabs =====
+const tab1 = allColumns.slice(0,10);
+const tab2 = allColumns.slice(10,20);
+const tab3 = allColumns.slice(20,30);
+const tab4 = allColumns.slice(30,40);
+const tab5 = allColumns.slice(40);
 
-// ================= LOAD HEADERS =================
+// ================= BUILD FORMS =================
+function buildForm(cols,target){
+let html="";
+cols.forEach(c=>{
+let ro = c==="رقم الطالب" ? "readonly" : "";
+html+=`
+<div class="field">
+<label>${c}</label>
+<input id="${c}" ${ro}>
+</div>`;
+});
+document.getElementById(target).innerHTML = html;
+}
 
+buildForm(tab1,"form1");
+buildForm(tab2,"form2");
+buildForm(tab3,"form3");
+buildForm(tab4,"form4");
+buildForm(tab5,"form5");
+
+// ================= TAB CONTROL =================
+function openTab(id,btn){
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+btn.classList.add("active");
+}
+
+// ================= LOAD NEXT ID =================
 fetch(API_URL)
-.then(res => res.json())
-.then(data => {
-
-headers = data.headers;
-
-const nextId = data.nextId;
-
-studentIdIndex = headers.indexOf("رقم الطالب");
-
-buildForm(headers, nextId);
-
-})
-.catch(err=>{
-alert("خطأ في الاتصال مع Google Script");
-console.log(err);
+.then(r=>r.json())
+.then(d=>{
+document.getElementById("رقم الطالب").value = d.nextId;
 });
 
-// ================= BUILD FORM =================
-
-function buildForm(cols, nextId){
-
-const form = document.getElementById("formArea");
-
-form.innerHTML = "";
-
-cols.forEach((col,index)=>{
-
-const div = document.createElement("div");
-div.className="field";
-
-let inputHTML = `<input id="f${index}" placeholder="${col}">`;
-
-if(col === "رقم الطالب"){
-inputHTML = `
-<input id="f${index}" 
-value="${nextId}" 
-readonly 
-style="background:#E0F2F1;font-weight:bold;color:#004D40">
-`;
-}
-
-div.innerHTML = `
-<label>${col}</label>
-${inputHTML}
-`;
-
-form.appendChild(div);
-
-});
-
-}
-
-// ================= SAVE =================
-
-function saveData(){
-
+// ================= ADD =================
+function addStudent(){
 let row=[];
-
-headers.forEach((h,i)=>{
-row.push(document.getElementById("f"+i).value);
-});
-
+allColumns.forEach(c=>row.push(document.getElementById(c).value));
 fetch(API_URL,{
 method:"POST",
 headers:{'Content-Type':'application/json'},
-body:JSON.stringify({ row: row })
-})
-
-.then(res=>res.json())
-.then(d=>{
-alert("✅ تم حفظ معلومات الطالب بنجاح");
-location.reload();
-});
-
+body:JSON.stringify({action:"add",row:row})
+}).then(()=>{alert("تمت الإضافة");location.reload();});
 }
 
+// ================= SEARCH =================
+function searchStudent(){
+let q=document.getElementById("searchBox").value.trim();
+if(!q){alert("ادخل رقم الطالب او الاسم");return;}
+fetch(API_URL,{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({action:"search",query:q})
+})
+.then(r=>r.json())
+.then(d=>{
+if(!d.found){alert("غير موجود");return;}
+currentRowIndex=d.rowIndex;
+allColumns.forEach((c,i)=>{
+document.getElementById(c).value=d.row[i]||"";
+});
+alert("تم تحميل البيانات للتعديل");
+});
+}
+
+// ================= UPDATE =================
+function saveUpdate(){
+if(!currentRowIndex){alert("ابحث عن طالب اولاً");return;}
+let row=[];
+allColumns.forEach(c=>row.push(document.getElementById(c).value));
+fetch(API_URL,{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({action:"update",rowIndex:currentRowIndex,row:row})
+}).then(()=>{alert("تم حفظ التعديلات");location.reload();});
+}
 </script>
 
 </body>
