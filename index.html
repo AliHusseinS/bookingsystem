@@ -1,456 +1,331 @@
-
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>منظومة طلبة الدراسات العليا</title>
+<title>نظام الصادرة الإلكتروني</title>
 
 <style>
-/* ===== Global ===== */
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:'Segoe UI',Tahoma,sans-serif;
-  background:#f2f2f2;
-  direction:rtl;
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Arial;
+    background: #f5f7fb;
+    color: #1e293b;
 }
 
-/* ===== Header ===== */
-header{
-  background:linear-gradient(90deg,#00897B,#004D40);
-  color:#fff;
-  padding:20px 30px;
-  font-size:22px;
-  box-shadow:0 6px 20px rgba(0,0,0,.15);
+/* ===== Layout ===== */
+.layout {
+    display: flex;
+    min-height: 100vh;
 }
 
-/* ===== Edit Notice ===== */
-#editNotice{
-  background:#FFF3CD;
-  color:#856404;
-  padding:12px;
-  text-align:center;
-  font-weight:bold;
-  border-bottom:2px solid #FFEEBA;
+/* ===== Sidebar ===== */
+.sidebar {
+    width: 260px;
+    background: #ffffff;
+    border-left: 1px solid #e5e7eb;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
-/* ===== Search ===== */
-.search{
-  background:#E0F2F1;
-  padding:15px;
-  text-align:center;
-  position:relative;
-}
-.search input{
-  width:360px;
-  padding:10px;
-  font-size:15px;
-  border:none;
-  border-bottom:2px solid #aaa;
-  background:transparent;
-}
-.search input:focus{
-  outline:none;
-  border-bottom-color:#00897B;
-}
-.search button{
-  margin-right:8px;
-  padding:10px 24px;
-  border:none;
-  border-radius:24px;
-  background:linear-gradient(90deg,#00897B,#004D40);
-  color:#fff;
-  font-weight:600;
-  cursor:pointer;
-  box-shadow:0 4px 12px rgba(0,0,0,.15);
-}
-.search button:hover{opacity:.9}
-
-/* ===== Autocomplete ===== */
-#suggestions{
-  position:absolute;
-  right:50%;
-  transform:translateX(50%);
-  top:55px;
-  width:360px;
-  background:#fff;
-  border-radius:16px;
-  box-shadow:0 8px 18px rgba(0,0,0,.2);
-  display:none;
-  z-index:1000;
-}
-.suggest-item{
-  padding:12px;
-  cursor:pointer;
-  border-bottom:1px solid #eee;
-}
-.suggest-item:last-child{border-bottom:none}
-.suggest-item:hover{background:#E0F2F1}
-.match{
-  background:#FFE082;
-  padding:0 4px;
-  border-radius:4px;
-  font-weight:bold;
+.sidebar h2 {
+    font-size: 15px;
+    margin-bottom: 18px;
+    color: #2563eb;
 }
 
-/* ===== Tabs ===== */
-.tabs{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  padding:12px;
-  background:#fff;
-}
-.tabs button{
-  border:none;
-  padding:10px 20px;
-  border-radius:24px;
-  background:#E0F2F1;
-  cursor:pointer;
-  font-weight:600;
-  transition:.3s;
-}
-.tabs button.active{
-  background:linear-gradient(90deg,#00897B,#004D40);
-  color:#fff;
+.sidebar .log-title {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 10px;
 }
 
-/* ===== Sections ===== */
-.section{
-  display:none;
-  padding:20px;
-}
-.section.active{display:block}
-
-/* ===== Form Grid ===== */
-.form-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:20px;
+.log-list {
+    flex: 1;
+    overflow-y: auto;
 }
 
-/* ===== Field Card ===== */
-.field{
-  background:#fff;
-  padding:14px;
-  border-radius:16px;
-  box-shadow:0 6px 20px rgba(0,0,0,.1);
-}
-.field label{
-  font-size:14px;
-  font-weight:600;
-  color:#555;
-}
-.field input{
-  width:100%;
-  margin-top:6px;
-  padding:10px 6px;
-  font-size:15px;
-  border:none;
-  border-bottom:2px solid #ccc;
-  background:transparent;
-}
-.field input:focus{
-  outline:none;
-  border-bottom-color:#00897B;
+.log-item {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    line-height: 1.6;
 }
 
-/* ===== Actions ===== */
-.actions{
-  text-align:center;
-  padding:20px;
+.science  { border-right:4px solid #2563eb; }
+.accredit { border-right:4px solid #16a34a; }
+.research { border-right:4px solid #7c3aed; }
+.postgrad { border-right:4px solid #f59e0b; }
+.oofcs    { border-right:4px solid #dc2626; }
+.ohuwm    { border-right:4px solid #0ea5e9; }
+.gatdu    { border-right:4px solid #ec4899; }
+.gatda    { border-right:4px solid #14b8a6; }
+
+/* ===== Sidebar Footer ===== */
+.sidebar-footer {
+    margin-top: 15px;
 }
-.actions button{
-  margin:6px;
-  padding:12px 28px;
-  border:none;
-  border-radius:24px;
-  font-weight:600;
-  cursor:pointer;
-  background:linear-gradient(90deg,#00897B,#004D40);
-  color:#fff;
-  box-shadow:0 4px 12px rgba(0,0,0,.15);
+
+.sidebar-footer .footer-box {
+    width: 100%;
+    min-height: 70px;
+    padding: 12px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 12px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+    color: #065f46;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.6;
 }
-.actions button:hover{opacity:.9}
-.actions button:disabled{opacity:.6;cursor:not-allowed}
+
+/* ===== Content ===== */
+.content {
+    flex: 1;
+    padding: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.card {
+    width: 420px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+}
+
+.card-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.card-header h1 {
+    font-size: 16px;
+    margin: 4px 0;
+    font-weight: 600;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #475569;
+}
+
+select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+select:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+button {
+    width: 100%;
+    margin-top: 22px;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ffffff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    display: none;
+    animation: spin .8s linear infinite;
+}
+
+button.loading .spinner {
+    display: inline-block;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* ===== Result Box ===== */
+.result-box {
+    margin-top: 18px;
+    padding: 16px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 12px;
+    text-align: center;
+    color: #065f46;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.8;
+    animation: fadeSlide .4s ease-out;
+}
+
+.result-box .icon {
+    font-size: 22px;
+    margin-bottom: 6px;
+    color: #059669;
+}
+
+.result-box .serial {
+    margin-top: 6px;
+    font-size: 16px;
+    color: #047857;
+}
+
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
 </style>
 </head>
 
 <body>
 
-<header>منظومة إدخال وتعديل بيانات الطلبة – كلية التخطيط العمراني</header>
+<div class="layout">
 
-<div id="editNotice" style="display:none">
-⚠️ أنت الآن في وضع تعديل بيانات الطالب
-</div>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h2>سجل الأرقام المحجوزة</h2>
+        <div class="log-title">الجلسة الحالية</div>
 
-<!-- باقي الكود (HTML + JS) كما هو تمامًا بدون أي تغيير -->
+        <div class="log-list" id="todayLog">
+            <div class="log-item">لا توجد عمليات حجز بعد</div>
+        </div>
 
-<div class="search">
-  <input id="searchBox"
-         placeholder="رقم الطالب أو الاسم الرباعي"
-         style="width:360px;padding:7px"
-         oninput="suggestNames()">
-  <button onclick="searchStudent()">بحث</button>
-  <div id="suggestions"></div>
-</div>
+        <!-- Footer inside Sidebar -->
+        <div class="sidebar-footer">
+            <div class="footer-box">
+                Powered by Ali Al-Waily<br>
+                الشؤون العلمية © 2026
+            </div>
+        </div>
+    </aside>
 
-<div class="tabs" id="tabs"></div>
-<div id="sections"></div>
+    <!-- Content -->
+    <main class="content">
+        <div class="card">
+            <div class="card-header">
+                <h1>نظام الصادرة الإلكتروني</h1>
+                <h1>كلية التخطيط العمراني / الشؤون العلمية</h1>
+            </div>
 
-<div class="actions">
-  <button id="addBtn" onclick="addStudent()">إضافة طالب جديد</button>
-  <button id="updateBtn" onclick="saveUpdate()" style="display:none">حفظ التعديلات</button>
-  <button id="cancelBtn" onclick="location.reload()" style="display:none">إلغاء</button>
+            <label>القسم / الوحدة</label>
+            <select id="department">
+                <option value="">— اختر —</option>
+                <option value="science">التعليم المستمر</option>
+                <option value="accredit">الدراسات العليا</option>
+                <option value="research">الشؤون العلمية</option>
+                <option value="postgrad">الدراسات والتخطيط</option>
+                <option value="oofcs">مكتب المعاون العلمي</option>
+                <option value="ohuwm">التسجيل</option>
+                <option value="gatdu">وحدة حقوق الانسان</option>
+                <option value="gatda">وحدة الحاضنة وتكنلوجيا المعلومات</option>
+                <option value="sci">البعثات</option>
+
+            </select>
+
+            <button id="reserveBtn" onclick="reserve()">
+                <span>حجز رقم صادرة جديد</span>
+                <span class="spinner"></span>
+            </button>
+
+            <div id="result"></div>
+        </div>
+    </main>
+
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbx_jJfVLlxWVDDCq-3H_1c5uqKLvNiPZbUpSHGg8fJMsZULdFAOJyGI2LXakzTWEAp6/exec";
+const API_URL =
+"https://script.google.com/macros/s/AKfycbwbjCHOdsjdIquKRTurm6ZMS0fZm2wzAOZggWtq-Ic4bokRyvkNEGO0bqGLnziVph-vYQ/exec";
 
-let MODE = "ADD";
-let currentRowIndex = null;
+function reserve() {
+    const btn = document.getElementById("reserveBtn");
+    const select = document.getElementById("department");
+    const deptClass = select.value;
+    const deptName = select.options[select.selectedIndex].text;
 
-const ALL_COLUMNS = [
-"رقم الطالب","المف الورقي","الاسم الرباعي واللقب","الجنس","تاريخ الميلاد",
-"سنة القبول","قناة القبول","الجامعة المقبول فيها","الكلية المقبول فيها","القسم المقبول فيه",
-"رقم الامر الجامعي بالقبول","تاريخ الامر الجامعي بالقبول","التسلسل في الامر الجامعي",
-"نوع القبول","نوع الدراسة","اصل الدراسة","رقم الموبايل","البريد الالكتروني",
-"رقم وثيقة البكالوريوس","تاريخ وثيقة البكالوريوس","معدل البكلوريوس",
-"سنة التخرج لشهادة البكالوريوس","الجامعة التي تخرج منها للبكالوريوس",
-"الكلية التي تخرج منها للبكالوريوس","القسم التي تخرج منه للبكالوريوس",
-"رقم وثيقة الدبلوم العالي","تاريخ وثيقة الدبلوم العالي","معدل الدبلوم العالي",
-"سنة التخرج لشهادة الدبلوم العال","الجامعة التي تخرج منها",
-"الكلية التي تخرج منها للدبلوم العلي","القسم التي تخرج منه للدبلوم العلي",
-"رقم وثيقة الماجستير","تاريخ وثيقة الماجستير","معدل الماجستير",
-"سنة التخرج لشهادة الماجستير","الجامعة التي تخرج منها الماجستير",
-"الكلية التي تخرج منها الماجستير","القسم التي تخرج منه الماجستير",
-"كفاءة الحاسوب","كفاءة اللغة الإنكليزية","كفاءة اللغة العربية",
-"المعدل النسبي","درجة الامتحان التنافسي","معدل اساس المفاضلة",
-"التخصص العام للطالب","التخصص الدقيق للطالب",
-"رقم الامر الجامعي بالغاء القبول","تاريخ الامر الجامعي بالغاء القبول","سبب الغاء القبول",
-"رقم الامر الاداري بالمباشرة بالدراسة","تاريخ الامر الاداري بالمباشرة بالدراسة",
-"تاريخ المباشرة الفعلية","تاريخ انتهاء المدة","تاريخ انتهاء مدة الدراسة",
-"جهة انتساب الموظف (الوزارة - والدائرة)","رقم كتاب عدم الممانعة",
-"تاريخ كتاب عدم الممانعة","جهة عدم الممانعة","موظف في جامعة الكوفة",
-"رقم الامر الجامعي للتفرغ الكلي","تاريخ الامر الجامعي للتفرغ الكلي",
-"رقم كتاب الاجازة الدراسية","تاريخ كتاب الاجازة الدراسية",
-"رقم الامر الخاص بانفكاك الموظف من وظيفته ",
-"تاريخ الامر الخاص بانفكاك الموظف من وظيفته ",
-"رقم الامر الجامعي بالتفرغ الجزئي","تاريخ الامر الجامعي بالتفرغ الجزئي",
-"رقم تمديد الاجازة الدراسية","تاريخ تمديد الاجازة الدراسية",
-"رقم الامر الجامعي بالتاجيل الأول","تاريخ الامر الجامعي بالتاجيل الأول","سبب التاجيل الأول",
-"رقم الامر الجامعي بالتاجيل الثاني","تاريخ الامر الجامعي بالتاجيل الثاني","سبب التاجيل الثاني ",
-"الجهة المنقول منها","الجهة المنقول اليها","رقم الامر الجامعي بالنقل","تاريخ الامر الجامعي بالنقل",
-"رقم الامر الخاص بالانفكاك","تأريخ الامر الخاص بالانفكاك",
-"رقم الامر الخاص بالمباشرة بعد النقل","تأريخ الامر الخاص بالمباشرة بعد النقل",
-"رقم الامر الجامعي بالنقل1","تاريخ الامر الجامعي بالنقل1",
-"رقم صحة صدور وثيقة البكالوريوس","تاريخ صحة صدور وثيقة البكالوريوس",
-"رقم صحة صدور وثيقة الالماجستير","تاريخ صحة صدور وثيقة الالماجستير",
-"رقم صحة صدور البطاقة الوطنية او الجنسية","تاريخ صحة صدور البطاقة الوطنية او الجنسية",
-"رقم صحة صدور شهادة الجنسية","تاريخ صحة صدور شهادة الجنسية",
-"رقم صحة صدور استمارة ذوي الشهداء","تاريخ صحة صدور استمارة ذوي الشهداء",
-"رقم صحة صدور استمارة السجناء","تاريخ صحة صدور استمارة السجناء",
-"رقم صحة صدور استمارة ذوي الإعاقة","تاريخ صحة صدور استمارة ذوي الإعاقة",
-"رقم الامر الجامعي بالترقين الأول","تاريخ الامر الجامعي بالترقين الأول",
-"سبب الترقين الأول","مرحلة الترقين الأول",
-"رقم الامر الجامعي بالاعادة للدراسة","تاريخ الامر الجامعي بالاعادة للدراسة",
-"سبب العودة بالترقين الأول",
-"رقم الامر الجامعي بالترقين الثاني","تاريخ الامر الجامعي بالترقين الثاني",
-"سبب الترقين الثاني","مرحلة الترقين الثاني",
-"رقم كتاب الاعادة للدراسة بالترقين الثاني",
-"تاريخ كتاب الاعادة للدراسة  بالترقين الثاني",
-"سبب العودة بالترقين الثاني",
-"رقم كتاب تشكيل لجنة إقرار البحث","تاريخ كتاب تشكيل لجنة إقرار البحث",
-"عنوان الرسالة باللغة العربية","عنوان الرسالة باللغة الإنكليزية",
-"اللقب العلمي للمشرف1","اسم المشرف الأول",
-"التخصص العام للمشرف الأول","التخصص الدقيق للمشرف الاول","مكان العمل للمشرف الاول",
-"رقم الامر الإداري بالمشرف الأول","تاريخ الامر الإداري بالمشرف الأول",
-"اللقب العلمي للمشرف2","اسم المشرف الثاني",
-"التخصص العام للمشرف الثاني","التخصص الدقيق للمشرف الثاني","مكان العمل للمشرف الثاني",
-"رقم الامر الإداري بالمشرف الثاني","تاريخ الامر الإداري بالمشرف الثاني",
-"تمديد اولي","رقم كتاب التمديد الأول","تاريخ كتاب التمديد الأول",
-"تاريخ بداية التمديد الأول","تاريخ نهاية التمديد الأول",
-"تمديد ثاني","رقم كتاب التمديد الثاني","تاريخ كتاب التمديد الثاني",
-"تاريخ بداية التمديد الثاني","تاريخ نهاية التمديد الثاني",
-"تمديد استثنائي اولي","رقم كتاب التمديد استثنائي اولي",
-"تاريخ كتاب التمديد استثنائي اولي",
-"تاريخ بداية التمديد استثنائي اول","تاريخ نهاية التمديد استثنائي اول",
-"تمديد استثنائي ثاني","رقم كتاب التمديد استثنائي ثاني",
-"تاريخ كتاب التمديد استثنائي ثاني",
-"تاريخ بداية التمديد استثنائي ثاني","تاريخ نهاية التمديد استثنائي ثاني",
-"تاريخ تسليم الرسالة او الاطروحة الى القسم العلمي",
-"رقم كتاب تسليم الرسالة او الاطروحة",
-"تاريخ كتاب تسليم الرسالة او الاطروحة",
-"اللقب العلمي-العلمي","اسم المقوم العلمي",
-"الاختصاص العام-العلمي","الاختصاص الدقيق-العلمي","مكان العمل-العلمي",
-"رقم كتاب التقويم العلمي","تاريخ كتاب التقويم العلمي",
-"اللقب العلمي-العلمي2","اسم المقوم العلمي2",
-"الاختصاص العام-العلمي2","الاختصاص الدقيق-العلمي2","مكان العمل-العلمي2",
-"رقم كتاب التقويم العلمي2","تاريخ كتاب التقويم العلمي2",
-"اللقب العلمي-اللغوي","اسم المقوم اللغوي",
-"الاختصاص العام-اللغوي","الاختصاص الدقيق-اللغوي","مكان العمل-اللغوي",
-"رقم كتاب التقويم اللغوي","تاريخ كتاب التقويم اللغوي",
-"رقم محضر تشكيل لجنة المناقشة","تاريخ محضر تشكيل لجنة المناقشة",
-"تاريخ المناقشة","الوقت (كتابتا)","اسم اليوم (كتابتا)","اسم القاعة",
-"رقم الامر الإداري بتشكيل لجنة المناقشة",
-"تاريخ الامر الإداري بتشكيل لجنة المناقشة",
-"اللقب العلمي لجنة1","اسم عضو لجنة المناقشة1","التخصص العام1",
-"التخصص الدقيق1","مكان العمل1","رئيسا",
-"اللقب العلمي لجنة2","اسم عضو لجنة المناقشة2","التخصص العام2",
-"التخصص الدقيق2","مكان العمل2","عضوا2",
-"اللقب العلمي لجنة3","اسم عضو لجنة المناقشة3","التخصص العام3",
-"التخصص الدقيق3","مكان العمل3","عضوا3",
-"اللقب العلمي لجنة4","اسم عضو لجنة المناقشة4","التخصص العام4",
-"التخصص الدقيق4","مكان العمل4","عضوا4",
-"اللقب العلمي لجنة5","اسم عضو لجنة المناقشة5","التخصص العام5",
-"التخصص الدقيق5","مكان العمل5","عضوا5",
-"اللقب العلمي لجنة6","اسم عضو لجنة المناقشة6","التخصص العام6",
-"التخصص الدقيق6","مكان العمل6","عضوا6",
-"اللقب العلمي لجنة7","اسم عضو لجنة المناقشة7","التخصص العام7",
-"التخصص الدقيق7","مكان العمل7","عضوا7",
-"رقم كتاب المصادقة على منح الشهادة","تاريخ كتاب المصادقة على منح الشهادة",
-"درجة الفصل الاول","درجة الفصل الثاني","معدل الدور الاول","معدل الدور الثاني",
-"الدور الذي نجح فيه","معدل الامتحان التكميلي","معدل السنة التحضيرية",
-"درجة المناقشة","معدل الطالب النهائي","تقدير الطالب النهائي",
-"رقم الامر الجامعي بالتخرج","تاريخ الامر الجامعي بالتخرج","سنة التخرج",
-"منظم الاستمارة","مقرر الدراسات العليا","رئيس القسم",
-"معاون العميد للشؤون العلمية والدراسات العليا","عميد الكلية","عمود1"
-];
-
-const TABS = {
-  "البيانات الأساسية": ALL_COLUMNS.slice(0,18),
-  "القبول والدراسة": ALL_COLUMNS.slice(18,48),
-  "الشهادات": ALL_COLUMNS.slice(48,78),
-  "الإجراءات الإدارية": ALL_COLUMNS.slice(78,120),
-  "الإشراف والبحث": ALL_COLUMNS.slice(120,155),
-  "التمديدات والتأجيل": ALL_COLUMNS.slice(155,190),
-  "المناقشة": ALL_COLUMNS.slice(190,235),
-  "التخرج والتواقيع": ALL_COLUMNS.slice(235)
-};
-
-(function buildUI(){
-  const tabs=document.getElementById("tabs");
-  const secs=document.getElementById("sections");
-  let first=true;
-  for(const t in TABS){
-    const b=document.createElement("button");
-    b.textContent=t;
-    if(first) b.classList.add("active");
-    b.onclick=()=>openTab(t,b);
-    tabs.appendChild(b);
-
-    const sec=document.createElement("div");
-    sec.id=t;
-    sec.className="section"+(first?" active":"");
-
-    const grid=document.createElement("div");
-    grid.className="form-grid";
-
-    TABS[t].forEach(c=>{
-      grid.innerHTML+=`<div class="field"><label>${c}</label><input id="${c}" ${c==="رقم الطالب"?"readonly":""}></div>`;
-    });
-
-    sec.appendChild(grid);
-    secs.appendChild(sec);
-    first=false;
-  }
-})();
-
-function openTab(id,btn){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-}
-
-function post(action,payload){
-  const f=new FormData();
-  f.append("action",action);
-  f.append("payload",JSON.stringify(payload));
-  return fetch(API_URL,{method:"POST",body:f}).then(r=>r.json());
-}
-
-fetch(API_URL).then(r=>r.json()).then(d=>{
-  document.getElementById("رقم الطالب").value=d.nextId;
-});
-
-function addStudent(){
-  if(MODE!=="ADD") return;
-  const row=ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
-  post("add",{row}).then(()=>alert("✅ تمت إضافة الطالب بنجاح"));
-}
-
-function searchStudent(){
-  const q=document.getElementById("searchBox").value.trim();
-  if(!q) return;
-  post("search",{query:q}).then(d=>{
-    if(!d.found) return alert("❌ الطالب غير موجود");
-    if(confirm("الطالب موجود، هل تريد تعديل بياناته؟")){
-      MODE="EDIT";
-      currentRowIndex=d.rowIndex;
-      ALL_COLUMNS.forEach((c,i)=>{
-        document.getElementById(c).value=d.row[i]||"";
-      });
-      document.getElementById("updateBtn").style.display="inline-block";
-      document.getElementById("cancelBtn").style.display="inline-block";
-      document.getElementById("addBtn").style.display="none";
-      document.getElementById("editNotice").style.display="block";
-
+    if (!deptClass) {
+        alert("يرجى اختيار  القسم / الوحدة");
+        return;
     }
-  });
-}
 
-function saveUpdate(){
-  if(MODE!=="EDIT") return;
+    btn.disabled = true;
+    btn.classList.add("loading");
+    document.getElementById("result").innerHTML = "جارٍ حجز الرقم...";
 
-  const btn = document.getElementById("updateBtn");
-  const originalText = btn.innerHTML;
-
-  btn.disabled = true;
-  btn.innerHTML = "⏳ جارِ الحفظ...";
-
-  const row = ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
-
-  post("update",{rowIndex:currentRowIndex,row})
-    .then(()=>{
-      btn.innerHTML = "✅ تم الحفظ بنجاح";
-      setTimeout(()=>{
-        btn.innerHTML = originalText;
+    fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "department=" + encodeURIComponent(deptName)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById("result").innerHTML = `
+                <div class="result-box">
+                    <div class="icon">✓</div>
+                    تم حجز رقم الصادرة بنجاح
+                    <div class="serial">رقم الصادرة : ${data.serial}</div>
+                </div>
+            `;
+            addToLog(data.serial, deptName, deptClass);
+        }
+    })
+    .finally(() => {
         btn.disabled = false;
-      },1500);
+        btn.classList.remove("loading");
     });
 }
 
+function addToLog(serial, deptName, deptClass) {
+    const container = document.getElementById("todayLog");
 
-/* ===== الإضافة فقط ===== */
-function highlightMatch(text, query){
-  if(!query) return text;
-  const q=query.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
-  return text.replace(new RegExp(q,"gi"),m=>`<span class="match">${m}</span>`);
+    if (container.children[0]?.textContent.includes("لا توجد")) {
+        container.innerHTML = "";
+    }
+
+    const div = document.createElement("div");
+    div.className = "log-item " + deptClass;
+    div.innerHTML =
+        "رقم صادرة: <b>" + serial + "</b><br>القسم: " + deptName;
+
+    container.prepend(div);
 }
-
-function suggestNames(){
-  const q=document.getElementById("searchBox").value.trim();
-  const box=document.getElementById("suggestions");
-  if(q.length<2){box.style.display="none";return;}
-  post("suggest",{query:q}).then(d=>{
-    box.innerHTML="";
-    if(!d.suggestions||!d.suggestions.length){box.style.display="none";return;}
-    d.suggestions.forEach(name=>{
-      const div=document.createElement("div");
-      div.className="suggest-item";
-      div.innerHTML=highlightMatch(name,q);
-      div.onclick=()=>{document.getElementById("searchBox").value=name;box.style.display="none";};
-      box.appendChild(div);
-    });
-    box.style.display="block";
-  });
-}
-
-document.addEventListener("click",e=>{
-  if(!e.target.closest(".search")) document.getElementById("suggestions").style.display="none";
-});
 </script>
 
 </body>
