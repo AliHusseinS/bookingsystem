@@ -205,7 +205,7 @@ header{
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwvT4nuOtUQTst4ms1T7AMtAKsjMoTx4MKKSRxKVpuERpF1g9x10c3H26_KLJLVFK6U/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbx_jJfVLlxWVDDCq-3H_1c5uqKLvNiPZbUpSHGg8fJMsZULdFAOJyGI2LXakzTWEAp6/exec";
 
 let MODE = "ADD";
 let currentRowIndex = null;
@@ -410,37 +410,16 @@ function saveUpdate(){
   btn.innerHTML = "⏳ جارِ الحفظ...";
 
   const row = ALL_COLUMNS.map(c=>document.getElementById(c).value||"");
-  const studentId = document.getElementById("رقم الطالب").value;
 
   post("update",{rowIndex:currentRowIndex,row})
-  .then(()=>{
-
-    // 🔥 إعادة البحث بالرقم الحقيقي وليس rowIndex
-    return post("search",{query:studentId});
-  })
-  .then(d=>{
-
-    if(d && d.found){
-      currentRowIndex = d.rowIndex; // تحديث السطر الصحيح
-      ALL_COLUMNS.forEach((c,i)=>{
-        document.getElementById(c).value = d.row[i] || "";
-      });
-    }
-
-    btn.innerHTML = "✅ تم الحفظ بنجاح";
-
-    setTimeout(()=>{
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-    },1500);
-
-  })
-  .catch(()=>{
-    btn.innerHTML="❌ خطأ بالحفظ";
-    btn.disabled=false;
-  });
+    .then(()=>{
+      btn.innerHTML = "✅ تم الحفظ بنجاح";
+      setTimeout(()=>{
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      },1500);
+    });
 }
-
 
 
 /* ===== الإضافة فقط ===== */
